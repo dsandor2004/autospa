@@ -1,0 +1,138 @@
+<h2><?php echo $this->translate('Költségek') ?></h2>
+<hr />
+<div class="hide" id="modal_title_new"><?php echo $this->translate('Új költség bevezetése'); ?></div>
+<div class="hide" id="torol_confirm_text"><?php echo $this->translate('Biztosan törlöd a költséget?'); ?></div>
+<div class="hide" id="modal_title_edit"><?php echo $this->translate('Költség adatainak módosítása'); ?></div>
+<div class="hide" id="modal_getformurl"><?php echo $this->url('koltseg', array('action' => 'getform')) ?></div>
+<div class="hide" id="modal_saveformurl"><?php echo $this->url('koltseg', array('action' => 'saveform')) ?></div>
+<div class="hide" id="delete_url"><?php echo $this->url('koltseg', array('action' => 'delete')) ?></div>
+<div class="hide" id="ajax_error_message"><?php echo $this->translate('Hiba! A műveletet nem sikerült végrehajtani!'); ?></div>
+<div class="hide" id="saveFormCallbackFuncName">saveMindenKoltsegCallback</div>
+
+<input type="hidden" id="isAllowedEdit" value="<?php echo ($this->isAllowed('mindenkoltseg', 'modosit') ? 1 : 0); ?>" />
+<input type="hidden" id="isAllowedDelete" value="<?php echo ($this->isAllowed('mindenkoltseg', 'torol') ? 1 : 0); ?>" />
+       
+<?php $dataTableId = 'koltsegek_table' ?>
+
+<?php
+if ($this->isAllowed('mindenkoltseg', 'letrehoz')) :
+    ?>
+
+    <a href="javascript:void(0)" class="create_edit" id="object_0">
+        <span class="glyphicon glyphicon-plus"></span> <?php echo $this->translate('Új költség bevitele'); ?>
+    </a>
+    <br /><br />
+    <?php
+endif;
+?>
+
+<a href="<?php echo $this->url('koltseg') ?>" id="mindenkoltseg_honap" class="btn btn-info"><?php echo $this->translate('Aktuális hónap') ?></a>
+<br /><br />
+
+<form class="form-inline" role="form" id="interval_selector">
+  <div class="form-group">
+    <label class="sr-only" for="from"></label>
+    <input type="date" class="form-control" id="from" name="from" value="<?php echo $from; ?>" />
+  </div>
+  -
+  <div class="form-group">
+    <label class="sr-only" for="to"></label>
+    <input type="date" class="form-control" id="to" name="to" value="<?php echo $to; ?>" />
+  </div>
+  <button type="submit" class="btn btn-info"><?php echo $this->translate('Keresés') ?></button>
+</form>
+<br />
+
+<table id="<?php echo $dataTableId ?>" class="table table-striped table-bordered myDataTable" width="100%">
+    <thead>
+        <tr>
+            <th><?php echo $this->translate('Költség neve'); ?></th>
+            <th><?php echo $this->translate('Ekezet nelkuli nev'); ?></th>
+            <th><?php echo $this->translate('Összeg'); ?></th>
+            <th><?php echo $this->translate('Összeg szam'); ?></th>
+            <th><?php echo $this->translate('Dátum'); ?></th>
+            <th><?php echo $this->translate('Típus'); ?></th>
+            <th><?php echo $this->translate('Ékezet nélküli Típus'); ?></th>
+            <th><?php echo $this->translate('Műveletek'); ?></th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php
+        $osszHo = 0;
+        if (count($koltsegek)) :
+            foreach ($koltsegek as $koltseg) {
+                $osszHo += $koltseg->getOsszeg();
+                ?>
+                <tr>
+                    <td><?php echo $this->escapeHtml($koltseg->getKoltsegnev()) ?></td>
+                    <td><?php echo $this->accent_trimmer($this->escapeHtml($koltseg->getKoltsegnev())) ?></td>
+                    <td><?php echo $this->escapeHtml($koltseg->getOsszeg()) ?> RON</td>
+                    <td><?php echo $this->escapeHtml($koltseg->getOsszeg()) ?></td>
+                    <td><?php echo $koltseg->getDatum()->format('Y-m-d'); ?></td>
+                    <td><?php echo $koltseg->getTipusString(); ?></td>
+                    <td><?php echo $this->accent_trimmer($this->escapeHtml($koltseg->getTipusString())) ?></td>
+                    <td>
+                        <?php
+                        if ($this->isAllowed('mindenkoltseg', 'modosit') && (!$login->hasRole(\SamUser\Entity\Role::ROLE_NAME_BAROS) && !$login->hasRole(\SamUser\Entity\Role::ROLE_NAME_UGYVEZETO) || $koltseg->isEditableAndDeletable())) :
+                            ?>
+                            <a href="javascript:void(0)" class="create_edit" id="object_<?php echo $koltseg->getId() ?>" title="<?php echo $this->translate('Módosítás'); ?>">
+                                <span class="glyphicon glyphicon-pencil"></span>
+                            </a>
+                            <?php
+                        endif;
+
+                        if ($this->isAllowed('mindenkoltseg', 'torol') && (!$login->hasRole(\SamUser\Entity\Role::ROLE_NAME_BAROS) && !$login->hasRole(\SamUser\Entity\Role::ROLE_NAME_UGYVEZETO) || $koltseg->isEditableAndDeletable())) :
+                            ?>
+                            <a href="javascript:void(0)" class="torol" id="object_torol_<?php echo $koltseg->getId() ?>" title="<?php echo $this->translate('Törlés'); ?>">
+                                <span class="glyphicon glyphicon-remove"></span>
+                            </a>
+                            <?php
+                        endif;
+                        ?>
+                    </td>
+                </tr>
+                <?php
+            }
+        endif;
+        ?>        
+    </tbody>
+    <tfoot>
+        <tr>
+            <th colspan="8"><?php echo $this->translate('Összeg:') . ' <span id="vegosszeg">' . number_format($osszHo, 2) . '</span> RON'; ?></td>
+        </tr>
+    </tfoot>
+</table>
+
+<?php echo $this->partial('/application/partial_modal.phtml'); ?>
+
+<script>
+    $(document).ready(function() {
+        $("#<?php echo $dataTableId ?>").dataTable({
+            drawCallback: function () {
+                  var api = this.api();
+                  var sum;
+                  if(api.column(3, {filter:'applied'}).data().length)
+                      sum = api.column(3, {filter:'applied'}).data().sum();
+                  else
+                      sum = 0;
+                    $("#vegosszeg").html(sum);
+                },     
+            language: {
+                url: '/js/DataTables-1.10.2/localization/Hungarian.json'
+            },
+            "columnDefs": [
+                {
+                    "targets": [ 1, 3, 6 ],
+                    "visible": false,
+                },
+                
+                {
+                    "type": "formatted-num",
+                    "targets": [2],
+                },
+                
+                { "orderable": false, "targets": 7 }
+            ]            
+        });        
+    });
+</script>

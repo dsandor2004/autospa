@@ -1,0 +1,357 @@
+<a href="<?php echo $this->url('munkas') ?>">
+    <span class="glyphicon glyphicon-arrow-left"></span>
+    <?php echo $this->translate('Vissza az alkalmazottak listájához') ?>
+</a>
+<br />
+
+<h3><?php echo $this->escapeHtml($munkas->getName()) ?></h3>
+<hr>
+
+<div class="hide" id="modal_title_new"><?php echo $this->translate('Új tartozás hozzáadása'); ?></div>
+<div class="hide" id="torol_confirm_text"><?php echo $this->translate('Biztosan törlöd a tartozást?'); ?></div>
+<div class="hide" id="lezar_confirm_text"><?php echo $this->translate('Biztosan lezárod a tartozást?'); ?></div>
+<div class="hide" id="modal_title_edit"><?php echo $this->translate('Tartozás módosítása'); ?></div>
+<div class="hide" id="modal_getformurl"><?php echo $this->url('tartozas', array('action' => 'getform')) ?></div>
+<div class="hide" id="modal_saveformurl"><?php echo $this->url('tartozas', array('action' => 'saveform')) ?></div>
+<div class="hide" id="delete_url"><?php echo $this->url('tartozas', array('action' => 'delete')) ?></div>
+<div class="hide" id="lezar_tartozas_url"><?php echo $this->url('tartozas', array('action' => 'close')) ?></div>
+<div class="hide" id="ajax_error_message"><?php echo $this->translate('Hiba! A műveletet nem sikerült végrehajtani!'); ?></div>
+<div class="hide" id="saveFormCallbackFuncName">saveTartozasCallback</div>
+
+<div class="hide" id="getteljesitmenyurl"><?php echo $this->url('munkas', array('action' => 'getteljesitmeny')) ?></div>
+<div class="hide" id="teljesitmenyurl"><?php echo $this->url('munkas', array('action' => 'teljesitmeny')) ?></div>
+<div class="hide" id="getlezarttartozasurl"><?php echo $this->url('munkas', array('action' => 'getlezarttartozas')) ?></div>
+
+<input type="hidden" id="munkas_id" value="<?php echo $munkas->getId() ?>" />
+<input type="hidden" id="isAllowedEdit" value="<?php echo ($this->isAllowed('tartozas', 'modosit') ? 1 : 0); ?>" />
+<input type="hidden" id="isAllowedDelete" value="<?php echo ($this->isAllowed('tartozas', 'torol') ? 1 : 0); ?>" />
+<input type="hidden" id="isAllowedClose" value="<?php echo ($this->isAllowed('tartozas', 'lezar') ? 1 : 0); ?>" />
+       
+<?php $dataTableId = 'tartozasok_table' ?>
+
+<?php
+if ($this->isAllowed('tartozas', 'letrehoz')) :
+    ?>
+
+    <a href="javascript:void(0)" class="create_edit_tartozas" id="object_0">
+        <span class="glyphicon glyphicon-plus"></span> <?php echo $this->translate('Új tartozás bevitele'); ?>
+    </a>
+    <br /><br />
+    <?php
+endif;
+?>
+
+<h4><?php echo $this->translate('Tartozások:') ?></h4>
+
+<!-- Nav tabs -->
+<ul class="nav nav-tabs" role="tablist">
+  <li role="presentation" class="active"><a href="#aktualis_tartozas_tab" role="tab" data-toggle="tab"><?php echo $this->translate('Aktuális'); ?></a></li>
+  <li role="presentation"><a href="#lezart_tartozas_tab" role="tab" data-toggle="tab"><?php echo $this->translate('Lezárt'); ?></a></li>
+</ul>
+
+<div class="tab-content">
+    <div role="tabpanel" class="tab-pane active" id="aktualis_tartozas_tab">
+        <table id="<?php echo $dataTableId ?>" class="table table-striped table-bordered myDataTable" width="100%">
+            <thead>
+                <tr>
+                    <th><?php echo $this->translate('Tartozás neve'); ?></th>
+                    <th><?php echo $this->translate('Ekezet nelkuli nev'); ?></th>
+                    <th><?php echo $this->translate('Összeg'); ?></th>
+                    <th><?php echo $this->translate('Összeg szam'); ?></th>
+                    <th><?php echo $this->translate('Dátum'); ?></th>
+                    <th><?php echo $this->translate('Műveletek'); ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                $osszHo = 0;
+                if (count($tartozasok)) :
+                    foreach ($tartozasok as $tartozas) {
+                        $osszHo += $tartozas->getOsszeg();
+                        ?>
+                        <tr>
+                            <td><?php echo $this->escapeHtml($tartozas->getTartozasnev()) ?></td>
+                            <td><?php echo $this->accent_trimmer($this->escapeHtml($tartozas->getTartozasnev())) ?></td>
+                            <td><?php echo $this->escapeHtml($tartozas->getOsszeg()) ?> RON</td>
+                            <td><?php echo $this->escapeHtml($tartozas->getOsszeg()) ?></td>
+                            <td><?php echo $tartozas->getDatum()->format('Y-m-d'); ?></td>
+                            <td>
+                                <?php
+                                if ($this->isAllowed('tartozas', 'modosit') && (!$login->hasRole(\SamUser\Entity\Role::ROLE_NAME_BAROS) && !$login->hasRole(\SamUser\Entity\Role::ROLE_NAME_UGYVEZETO) || $tartozas->isEditableAndDeletable())) :
+                                    ?>
+                                    <a href="javascript:void(0)" class="create_edit_tartozas" id="object_<?php echo $tartozas->getId() ?>" title="<?php echo $this->translate('Módosítás'); ?>">
+                                        <span class="glyphicon glyphicon-pencil"></span>
+                                    </a>
+                                    <?php
+                                endif;
+
+                                if ($this->isAllowed('tartozas', 'torol') && (!$login->hasRole(\SamUser\Entity\Role::ROLE_NAME_BAROS) && !$login->hasRole(\SamUser\Entity\Role::ROLE_NAME_UGYVEZETO) || $tartozas->isEditableAndDeletable())) :
+                                    ?>
+                                    <a href="javascript:void(0)" class="torol" id="object_torol_<?php echo $tartozas->getId() ?>" title="<?php echo $this->translate('Törlés'); ?>">
+                                        <span class="glyphicon glyphicon-remove"></span>
+                                    </a>
+                                    <?php
+                                endif;
+                                
+                                if ($this->isAllowed('tartozas', 'lezar')) :
+                                    ?>
+                                    <a href="javascript:void(0)" id="tartozas_lezar_<?php echo $tartozas->getId() ?>" class="btn btn-default">
+                                        <?php echo $this->translate('Lezár'); ?>
+                                    </a>
+                                    <?php
+                                endif;
+                                
+                                ?>
+                            </td>
+                        </tr>
+                        <?php
+                    }
+                endif;
+                ?>        
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th colspan="6"><?php echo $this->translate('Összeg:') . ' <span id="vegosszeg">' . number_format($osszHo, 2) . '</span> RON'; ?></td>
+                </tr>
+            </tfoot>
+        </table>      
+    </div>
+    <div role="tabpanel" class="tab-pane" id="lezart_tartozas_tab">
+        <?php
+        $now = new \DateTime();
+        $from_tartozas = $now->format('Y-m-01');
+        $to_tartozas = $now->format('Y-m-d');
+        ?>
+
+        <form class="form-inline" role="form" id="tartozas_interval_selector">
+          <div class="form-group">
+            <label class="sr-only" for="from"></label>
+            <input type="date" class="form-control" id="lezart_tartozas_from" name="lezart_tartozas_from" value="<?php echo $from_tartoza; ?>" />
+          </div>
+          -
+          <div class="form-group">
+            <label class="sr-only" for="to"></label>
+            <input type="date" class="form-control" id="lezart_tartozas_to" name="lezart_tartozas_to" value="<?php echo $to_tartozas; ?>" />
+          </div>
+          <a href="javascript:void(0)" id="lezart_tartozas_submit" class="btn btn-info"><?php echo $this->translate('Keresés') ?></a>
+        </form>
+        <br />
+        <div id="lezart_tartozas_holder">
+            <!-- Remote content -->
+        </div>
+        <br /><br />
+    </div>
+</div>
+
+
+<br />
+<h4><?php echo $this->translate('Teljesítmény:') ?></h4>
+
+<div id="teljesitmeny_div">
+    <div class="ajax_loader"></div>
+    <!-- Remote content -->
+</div>
+
+<?php
+if ($habpenz4 || $reklampenz4) {
+    ?>
+    <h4><?php echo $this->translate('Egyéb juttatások az előző hónapban:') ?></h4>
+    <?php
+    if ($habpenz4)
+        echo $this->translate('Habpénz: <b>') . $habpenz4 . ' RON</b><br />';
+        
+    if ($reklampenz4)
+        echo $this->translate('Reklámpénz: <b>') . $reklampenz4 . ' RON</b><br />';
+	
+	?>
+	<br /><br />
+	<?php
+}
+?>
+
+<?php
+if ($habpenz || $reklampenz) {
+    ?>
+    <h4><?php echo $this->translate('Egyéb juttatások az aktuális hónapban:') ?></h4>
+    <?php
+    if ($habpenz)
+        echo $this->translate('Habpénz: <b>') . $habpenz . ' RON</b><br />';
+        
+    if ($reklampenz)
+        echo $this->translate('Reklámpénz: <b>') . $reklampenz . ' RON</b><br />';
+
+	?>
+	<br /><br />
+	<?php	
+}
+?>
+	
+<h4><?php echo $this->translate(sprintf('Fizetés %s - %s között:' , $from4, $to4)) ?></h4>
+<div>
+    <?php
+	if ($napimuszakok4) {
+		$dayCounterString = ": $napimuszakok4 nap";
+		echo "<b>".number_format($fixFizetes4, 2) . ' RON</b>(' . $this->translate('Fix') . ')' ;
+	} elseif ($fixFizetes4 + $reszesedes4 + $ejjelipenz4 == 0) {
+		echo "<b>0.00 RON</b>";
+	} else {
+		$dayCounterString = '';
+		if ($dayCounter['fiko4'] + $dayCounter['koronka4']) {
+			$dayCounterString = ': ';
+			if ($dayCounter['fiko4'])
+				$dayCounterString .=  'Fikó ' . $dayCounter['fiko4'] . ' nap';
+
+			if ($dayCounter['koronka4']) {
+				if ($dayCounter['fiko4'])
+					$dayCounterString .= ', ';
+
+				$dayCounterString .=  'Koronka ' . $dayCounter['koronka4'] . ' nap';
+			}
+		}
+
+		echo number_format($fixFizetes4, 2) . ' RON(' . $this->translate('Fix') . $dayCounterString . ')' ;
+
+		if ((float)$ejjelipenz4)
+		   echo ' + ' . $ejjelipenz4 . ' RON(' . $this->translate('Éjjelipénz') . ')';
+
+		if ($reszesedes4)
+			echo ' + ' . number_format((float)$reszesedes4, 2) . ' RON(' . $this->translate('%') . ')';
+		?>
+		= <b><?php echo number_format($fixFizetes4 + $reszesedes4 + $ejjelipenz4, 2) ?> RON</b>
+		<?php
+	}
+	?>
+</div>
+<br />
+
+<h4><?php echo $this->translate(sprintf('Fizetés %s - %s között:' , $from, $to)) ?></h4>
+<div>
+    <?php
+	if ($napimuszakok) {
+		$dayCounterString = ": $napimuszakok nap";
+		echo "<b>".number_format($fixFizetes, 2) . ' RON</b>(' . $this->translate('Fix') . ')' ;
+	} elseif ($fixFizetes + $reszesedes + $ejjelipenz == 0) {
+		echo "<b>0.00 RON</b>";
+	} else {
+		$dayCounterString = '';
+		if ($dayCounter['fiko'] + $dayCounter['koronka']) {
+			$dayCounterString = ': ';
+			if ($dayCounter['fiko'])
+				$dayCounterString .=  'Fikó ' . $dayCounter['fiko'] . ' nap';
+
+			if ($dayCounter['koronka']) {
+				if ($dayCounter['fiko'])
+					$dayCounterString .= ', ';
+
+				$dayCounterString .=  'Koronka ' . $dayCounter['koronka'] . ' nap';
+			}
+		}
+
+		echo number_format($fixFizetes, 2) . ' RON(' . $this->translate('Fix') . $dayCounterString . ')' ;
+
+		if ((float)$ejjelipenz)
+		   echo ' + ' . $ejjelipenz . ' RON(' . $this->translate('Éjjelipénz') . ')';
+
+		if ($reszesedes)
+			echo ' + ' . number_format((float)$reszesedes, 2) . ' RON(' . $this->translate('%') . ')';
+		
+		?>
+		= <b><?php echo number_format($fixFizetes + $reszesedes + $ejjelipenz, 2) ?> RON</b>
+		<?php
+	}
+	?>
+</div>
+<br />
+
+<h4><?php echo $this->translate(sprintf('Fizetés %s - %s között:' , str_replace('-', '.', $aktualisFrom), str_replace('-', '.', $aktualisTo))) ?></h4>
+<div>
+    <?php
+    $dayCounterString = '';
+	
+	if ($napimuszakok_aktualis) {
+		$dayCounterString = ": $napimuszakok_aktualis nap";
+		echo "<b>".number_format($fixFizetes_aktualis, 2) . ' RON</b>(' . $this->translate('Fix') . ')' ;
+	} elseif ($fixFizetes_aktualis + $reszesedes_aktualis + $ejjelipenz_aktualis == 0) {
+		echo "<b>0.00 RON</b>";
+	} else {
+		$dayCounterString = '';
+		if ($dayCounter['fiko_aktualis'] + $dayCounter['koronka_aktualis']) {
+        $dayCounterString = ': ';
+        if ($dayCounter['fiko_aktualis'])
+            $dayCounterString .=  'Fikó ' . $dayCounter['fiko_aktualis'] . ' nap';
+        
+        if ($dayCounter['koronka_aktualis']) {
+            if ($dayCounter['fiko_aktualis'])
+                $dayCounterString .= ', ';
+            
+            $dayCounterString .=  'Koronka ' . $dayCounter['koronka_aktualis'] . ' nap';
+        }
+    }
+    
+		echo number_format($fixFizetes_aktualis , 2) . ' RON(' . $this->translate('Fix') . $dayCounterString . ')' ;
+
+		if ((float)$ejjelipenz_aktualis)
+		   echo ' + ' . $ejjelipenz_aktualis . ' RON(' . $this->translate('Éjjelipénz') . ')';
+
+		if ($reszesedes_aktualis)
+			echo ' + ' . number_format((float)$reszesedes_aktualis, 2) . ' RON(' . $this->translate('%') . ')';
+		?>
+		= <b><?php echo number_format($fixFizetes_aktualis + $reszesedes_aktualis + $ejjelipenz_aktualis, 2) ?> RON</b>
+		<?php
+	}
+	?>
+</div>
+<br /> <br />
+
+<?php echo $this->partial('/application/partial_modal.phtml'); ?>
+
+<script>
+    $(document).ready(function() {
+        
+        $("#teljesitmeny_div").load($("#teljesitmenyurl").html());
+                
+        $("#<?php echo $dataTableId ?>").dataTable({
+            "order": [[ 4, "asc" ]],
+            drawCallback: function () {
+                  var api = this.api();
+                  var sum;
+                  if(api.column(3, {filter:'applied'}).data().length)
+                      sum = api.column(3, {filter:'applied'}).data().sum();
+                  else
+                      sum = 0;
+                    $("#vegosszeg").html(sum);
+                },     
+            language: {
+                url: '/js/DataTables-1.10.2/localization/Hungarian.json'
+            },
+            "columnDefs": [
+                {
+                    "targets": [ 1, 3 ],
+                    "visible": false,
+                },
+                
+                {
+                    "type": "formatted-num",
+                    "targets": [2],
+                },
+                
+                { "orderable": false, "targets": 5 }
+            ]            
+        });
+        
+        $("#lezart_tartozas_submit").click(function() {
+            $("#lezart_tartozas_holder").html(getAjaxLoader());
+            var data = {
+                'from' : $("#lezart_tartozas_from").val(),
+                'to' : $("#lezart_tartozas_to").val(),
+                'munkas_id' : $("#munkas_id").val(),
+            };
+
+            $.get($("#getlezarttartozasurl").html(), data, function(html) {
+                $("#lezart_tartozas_holder").html(html);
+            });
+        });
+
+        $("#lezart_tartozas_submit").trigger('click');        
+    });
+</script>

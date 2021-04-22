@@ -1,0 +1,80 @@
+<?php
+
+namespace Application\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * Aktivitas
+ *
+ * @ORM\Table(name="aktivitas", indexes={@ORM\Index(name="baros_id", columns={"baros_id"}), @ORM\Index(name="ceg_id", columns={"ceg_id"})})
+ * @ORM\Entity
+ */
+class Aktivitas
+{
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="id", type="integer", nullable=false)
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="IDENTITY")
+     */
+    private $id;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="nev", type="string", length=255, nullable=false)
+     */
+    private $nev;
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="ar", type="integer", nullable=false)
+     */
+    private $ar;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="idopont", type="datetime", nullable=false)
+     */
+    private $idopont;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="kellekek", type="string", length=255, nullable=true)
+     */
+    private $kellekek;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="rendszam", type="string", length=10, nullable=true)
+     */
+    private $rendszam;
+
+    /**
+     * @var \Application\Entity\Ceg
+     *
+     * @ORM\ManyToOne(targetEntity="Application\Entity\Ceg")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="ceg_id", referencedColumnName="id")
+     * })
+     */
+    private $ceg;
+
+    /**
+     * @var \Application\Entity\Baros
+     *
+     * @ORM\ManyToOne(targetEntity="Application\Entity\Baros")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="baros_id", referencedColumnName="id")
+     * })
+     */
+    private $baros;
+
+
+}

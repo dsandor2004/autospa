@@ -1,0 +1,23 @@
+
+    <?php
+    $i = 0;
+    foreach ($element->getValueOptions() as $key => $value):
+        if ($i % 3 == 0) {
+            if ($i > 0) {
+                echo '</div>';
+            }
+            ?>
+            <div class="row">
+            <?php
+        }
+        ?>
+            <div class="col-md-4">
+                <input <?php if ($element->getValue() && in_array($value['value'], $element->getValue())) echo "checked='checked'" ?> type="checkbox" id="<?php echo $element->getName() ?>_<?php echo $value['value'] ?>" name="<?php echo $element->getName() ?>[]" value="<?php echo $value['value']; ?>">
+                <label for="<?php echo $element->getName() ?>_<?php echo $value['value'] ?>"><?php echo $value['label']; ?></label>
+            </div>
+        <?php
+        
+        $i++;        
+    endforeach;
+    ?>
+            </div>

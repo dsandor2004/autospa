@@ -1,0 +1,38 @@
+<table border="1" cellspacing="2" cellpadding="2">
+	<thead>
+		<tr>
+			<th><?php echo $this->translate('Név'); ?></th>
+			<th><?php echo $this->translate('Db'); ?></th>
+			<th><?php echo $this->translate('Részletek'); ?></th>
+			<th><?php echo $this->translate('Cash'); ?></th>
+		</tr>
+	</thead>
+<?php
+$totalCash = 0;
+if ($aruforgasOsszesito) {
+	foreach ($aruforgasOsszesito as $aruNev => $row) {
+		?>
+		<tr>
+			<?php
+			$reszletekString = "";
+			$cashDb = isset($row[\Application\Entity\Aruforgas::TIPUS_NORMAL_STRING]) ? $row[\Application\Entity\Aruforgas::TIPUS_NORMAL_STRING] : 0;
+			$cash = $cashDb * $arak[$aruNev];
+			$totalCash += $cash;
+			foreach ($row as $tipusNev => $darab) {
+				$reszletekString .= $darab . ' x '. $tipusNev.';';
+			}
+			?>
+			<td><?php echo $aruNev; ?></td>
+			<td><?php echo  array_sum($row); ?></td>
+			<td><?php echo rtrim($reszletekString, ";") ?></td>
+			<td><?php echo $cash ?> RON</td>
+		</tr>
+		<?php
+	}
+}
+?>
+		<tr>
+			<td colspan="3" align="right"><b><?php echo $this->translate('Összesen: '); ?></b></td>
+			<td><b><?php echo $totalCash ?> RON</b></td>
+		</tr>
+</table>

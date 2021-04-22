@@ -1,0 +1,41 @@
+<?php
+if ($aruforgasok) {
+	?>
+	<table border="1" cellpadding="3" cellspacing="3" id="aruforgas_table">
+		<thead>
+			<tr>
+				<th><?php echo $this->translate('Árunév'); ?></th>
+				<th><?php echo $this->translate('Mennyiségváltozás'); ?></th>
+				<th><?php echo $this->translate('Megjegyzés'); ?></th>
+				<th><?php echo $this->translate('Típus'); ?></th>
+				<th><?php echo $this->translate('Dátum'); ?></th>
+			</tr>
+		</thead>
+		<?php
+		foreach ($aruforgasok as $aruforgas) {
+			if (!($aruforgas->getDarab() == $aktualisDarabok[$aruforgas->getAru()->getId()] && $aruforgas->getDarab() == 0)) {
+				$darabValtozas = $aruforgas->getDarab();
+				if ($darabValtozas >= 0) {
+					$rowClass= "green";
+					$darabValtozas = '+' . $darabValtozas;
+				} else {
+					$rowClass = "red";
+				}
+				?>
+				<tr class="<?php echo $rowClass; ?>">
+					<td><?php echo $aruforgas->getAru()->getNev(); ?></td>
+					<td><?php echo (int)$aktualisDarabok[$aruforgas->getAru()->getId()] . $darabValtozas . ' = ' . ($aktualisDarabok[$aruforgas->getAru()->getId()] + $aruforgas->getDarab()) ?></td>
+					<td><?php echo $aruforgas->getMegjegyzes(); ?></td>
+					<td><?php echo $aruforgas->getTipusString(); ?></td>
+					<td><?php echo $aruforgas->getCreatedAt()->format('Y-m-d H:i:s'); ?></td>
+				</tr>
+				<?php
+				$aktualisDarabok[$aruforgas->getAru()->getId()] += $aruforgas->getDarab();
+			}
+		}
+		?>
+	</table>
+	<?php
+} else {
+	echo 'Nincs találat';
+}

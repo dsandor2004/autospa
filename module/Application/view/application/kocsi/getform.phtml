@@ -1,0 +1,19 @@
+<?php
+$form->prepare();
+echo $this->form()->openTag($form);
+?>
+<?php echo $this->formRow($form->get('id')); ?>
+
+<div class="form-group">
+    <?php echo $this->formRow($form->get('rendszam')); ?>
+    <span class="help-block" id="help_<?php echo $form->get('rendszam')->getAttribute('id') ?>"></span>
+</div>
+<?php echo $this->form()->closeTag($form); ?>
+
+<script>
+    $(document).ready(function() {
+        $("#<?php echo $form->get('rendszam')->getAttribute('id') ?>").keyup(function(){
+            $(this).val($(this).val().toUpperCase());
+        });
+    });
+</script>

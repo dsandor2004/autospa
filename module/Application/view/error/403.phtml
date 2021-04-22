@@ -1,0 +1,14 @@
+<h2><?php echo $this->translate('Nincs jogosultságod elérni ezt az oldalt!' ) ?></h2>
+<?php
+if (!$this->zfcUserIdentity()) {
+    ?>
+    <a href="<?php echo $this->url('zfcuser/login') ?>"><?php echo $this->translate('Bejelentkezés'); ?></a>
+    <?php
+} else {
+    ?>
+    <a href="javascript: history.go(-1)">
+        <span class="glyphicon glyphicon-arrow-left"></span>
+        <?php echo $this->translate('Vissza az előző oldalra'); ?>
+    </a>
+    <?php
+}

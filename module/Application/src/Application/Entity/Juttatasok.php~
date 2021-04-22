@@ -1,0 +1,53 @@
+<?php
+
+namespace Application\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * Juttatasok
+ *
+ * @ORM\Table(name="juttatasok")
+ * @ORM\Entity
+ */
+class Juttatasok
+{
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="id", type="integer", nullable=false)
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="IDENTITY")
+     */
+    private $id;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="ejjelipenz", type="float", precision=10, scale=0, nullable=false)
+     */
+    private $ejjelipenz;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="habpenz", type="float", precision=10, scale=0, nullable=false)
+     */
+    private $habpenz;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="reklampenz", type="float", precision=10, scale=0, nullable=false)
+     */
+    private $reklampenz;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="baroscsaj", type="float", precision=10, scale=0, nullable=false)
+     */
+    private $baroscsaj;
+
+
+}

@@ -1,0 +1,67 @@
+<?php
+
+namespace Application\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * Ceg
+ *
+ * @ORM\Table(name="ceg", uniqueConstraints={@ORM\UniqueConstraint(name="UNIQ_7E8CC7722B7E1DA8", columns={"cegname"})})
+ * @ORM\Entity
+ */
+class Ceg
+{
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="id", type="integer", nullable=false)
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="IDENTITY")
+     */
+    private $id;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="cegname", type="string", length=255, nullable=false)
+     */
+    private $cegname;
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="status", type="smallint", nullable=false)
+     */
+    private $status;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="szerzodesdatum", type="date", nullable=false)
+     */
+    private $szerzodesdatum;
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="automatikushosszabbitas", type="smallint", nullable=false)
+     */
+    private $automatikushosszabbitas;
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="idotartam", type="smallint", nullable=false)
+     */
+    private $idotartam;
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="fizetesi_hatarido", type="smallint", nullable=false)
+     */
+    private $fizetesiHatarido;
+
+
+}

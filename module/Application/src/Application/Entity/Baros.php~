@@ -1,0 +1,39 @@
+<?php
+
+namespace Application\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * Baros
+ *
+ * @ORM\Table(name="baros", uniqueConstraints={@ORM\UniqueConstraint(name="UNIQ_DA56A88691657DAE", columns={"fullname"})})
+ * @ORM\Entity
+ */
+class Baros
+{
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="id", type="integer", nullable=false)
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="IDENTITY")
+     */
+    private $id;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="fullname", type="string", length=255, nullable=true)
+     */
+    private $fullname;
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="status", type="smallint", nullable=false)
+     */
+    private $status;
+
+
+}

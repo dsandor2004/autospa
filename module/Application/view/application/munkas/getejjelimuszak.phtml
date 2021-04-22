@@ -1,0 +1,49 @@
+<div id="muszak_holder" class="<?php if (!count($ejjelimuszak)) echo 'hide'; ?>">
+    <?php
+    if ($login->hasRole(\SamUser\Entity\Role::ROLE_NAME_ADMIN)) :
+        ?>
+        <a href="javascript:void(0)" id="edit_muszak">
+            <span class="glyphicon glyphicon-pencil"></span>
+            <?php echo $this->translate('Módosítás') ?>
+        </a>
+        <br /><br/>
+        <?php
+    endif;
+    
+    $ejjelimunkasIds = array();
+    foreach ($ejjelimuszak as $muszak) {
+        $ejjelimunkasIds[] = $muszak->getMunkas()->getId();
+        ?>
+        <div id="muszak_munkas_<?php echo $muszak->getMunkas()->getId() ?>"><?php echo $muszak->getMunkas()->getName() ?></div>
+        <?php
+    }
+    ?>
+</div>
+
+<div class="warning_div <?php if (count($ejjelimuszak)) echo 'hide'; ?>" id="ejjelimuszak_warning">
+    <span class="glyphicon glyphicon-exclamation-sign"></span>
+    <?php echo $this->translate('Erre a napra nincs az éjjeliműszak beállítva') ?>
+</div>
+
+<form class="<?php if (count($ejjelimuszak)) echo 'hide'; ?>" id="ejjelimuszak_form">    
+    <div class="form-group">
+        <label for="ejjel_munkasok_fiko" class="sl-only">Fikó</label><br>
+        <?php
+        foreach ($munkasokFiko as $munkas) {
+            ?>
+            <input type="checkbox" value="<?php echo $munkas->getId() ?>" name="muszakmunkas[]" id="muszakmunkas_<?php echo $munkas->getId() ?>" <?php if (in_array($munkas->getId(), $ejjelimunkasIds)) echo 'checked="checked"' ?> /> <label for="muszakmunkas_<?php echo $munkas->getId() ?>" id="muszakmunkas_nev_<?php echo $munkas->getId() ?>"><?php echo $munkas->getName() ?></label> <br>
+            <?php
+        }
+        ?>
+        <br />
+        <label for="ejjel_munkasok_koronka" class="sl-only">Koronka</label><br>
+        <?php
+        foreach ($munkasokKoronka as $munkas) {
+            ?>
+            <input type="checkbox" value="<?php echo $munkas->getId() ?>" name="muszakmunkas[]" id="muszakmunkas_<?php echo $munkas->getId() ?>" <?php if (in_array($munkas->getId(), $ejjelimunkasIds)) echo 'checked="checked"' ?> /> <label for="muszakmunkas_<?php echo $munkas->getId() ?>" id="muszakmunkas_nev_<?php echo $munkas->getId() ?>"><?php echo $munkas->getName() ?></label> <br>
+            <?php
+        }
+        ?>
+    </div>
+    <a href="javascript:void(0)" class="btn btn-info" id="ejjeli_mentes"><?php echo $this->translate('Mentés') ?></a> <span class="error-text hide" id="ures_ejjeli"><?php echo $this->translate('Válassz ki legalább egy munkást!') ?></span>
+</form>

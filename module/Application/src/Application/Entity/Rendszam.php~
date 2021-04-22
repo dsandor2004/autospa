@@ -1,0 +1,42 @@
+<?php
+
+namespace Application\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * Rendszam
+ *
+ * @ORM\Table(name="rendszam", uniqueConstraints={@ORM\UniqueConstraint(name="UNIQ_639C3096639C3096", columns={"rendszam"})}, indexes={@ORM\Index(name="IDX_639C30965181F7F2", columns={"ceg_id"})})
+ * @ORM\Entity
+ */
+class Rendszam
+{
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="id", type="integer", nullable=false)
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="IDENTITY")
+     */
+    private $id;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="rendszam", type="string", length=10, nullable=false)
+     */
+    private $rendszam;
+
+    /**
+     * @var \Application\Entity\Ceg
+     *
+     * @ORM\ManyToOne(targetEntity="Application\Entity\Ceg")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="ceg_id", referencedColumnName="id")
+     * })
+     */
+    private $ceg;
+
+
+}

@@ -1,0 +1,190 @@
+<h2><?php echo $this->translate('Fizetéskategóriák') ?></h2>
+<hr />
+<div class="hide" id="get_fizeteskategoria_url"><?php echo $this->url('fizeteskategoria', array('action' => 'getfizeteskategoria')) ?></div>
+<div class="hide" id="save_fizeteskategoria_url"><?php echo $this->url('fizeteskategoria', array('action' => 'save')) ?></div>
+
+<form class="form-inline" role="form">  
+  <div class="form-group">
+    <label for="munkastipus" class="sr-only">&nbsp;</label>
+    <select id="munkastipus" name="munkastipus" class="form-control">
+        <option value=""><?php echo $this->translate('--Válassz--') ?></option>
+        <?php
+        foreach ($munkastipus as $tipus) {
+            ?>
+            <option value="<?php echo $tipus->getId() ?>"><?php echo $tipus->getTipusNev() ?></option>
+            <?php
+        }
+        ?>
+    </select>      
+  </div>
+
+  <div class="form-group">
+    <label for="hely" class="sr-only">&nbsp;</label>
+    <select id="hely" name="hely" class="form-control">
+        <option value=""><?php echo $this->translate('--Válassz--') ?></option>
+        <option value="<?php echo \Application\Entity\Aktivitas::AKTIVITAS_HELY_FIKO_ID ?>"><?php echo \Application\Entity\Aktivitas::AKTIVITAS_HELY_FIKO ?></option>
+        <option value="<?php echo \Application\Entity\Aktivitas::AKTIVITAS_HELY_KORONKA_ID ?>"><?php echo \Application\Entity\Aktivitas::AKTIVITAS_HELY_KORONKA ?></option>
+    </select>      
+  </div> 
+</form>
+
+<br />
+<div id="tartalom_holder"><!-- Remote content --></div>
+
+<script>
+    $(document).ready(function() {
+        $("#munkastipus, #hely").change(function() {
+            if ($("#munkastipus").val() && $("#hely").val()) {
+                $("#tartalom_holder").html(getAjaxLoader());
+                var data = {
+                    'munkastipus' : $("#munkastipus").val(),
+                    'hely' : $("#hely").val(),
+                };
+
+                $.get($("#get_fizeteskategoria_url").html(), data, function(html) {
+                    $("#tartalom_holder").html(html);
+                });
+            }
+        });
+        
+        $("body").on('click', '#save_fizeteskategoria', function() {
+            var i = $("#rowcount").val();
+            
+            if (i == 0) {
+                alert('Hozz létre legalább egy időszakaszt!');
+                return false;
+            }
+            
+            $("#fizeteskategoria_form input").each(function() {
+                $(this).css('border', '1px solid #ccc');
+            });
+            
+            if ($("#minregiseg_1").val() != '0') {
+                $("#minregiseg_1").css('border', '1px solid #a94442');
+                $("#minregiseg_1").focus();
+                alert('A régiség 0-tól kell induljon!');
+                return false;
+            }
+            
+            
+            if ($("#maxregiseg_" + i).val() != '') {
+                $("#maxregiseg_" +i).css('border', '1px solid #a94442');
+                $("#maxregiseg_" +i).focus();
+                alert('A régiségnél az utolsó mezőt üresen kell hagyni!');
+                return false;
+            }
+            
+            for (var j = 1; j <= i; j++) {
+                 
+                if ($("#minregiseg_" + j).val() == '') {
+                    $("#minregiseg_" + j).css('border', '1px solid #a94442');
+                    $("#minregiseg_" + j).focus();
+                    alert('A mező nem lehet üres!');
+                    return false;
+                }
+                
+                if (j < i && $("#maxregiseg_" + j).val() == '') {
+                    $("#maxregiseg_" + j).css('border', '1px solid #a94442');
+                    $("#maxregiseg_" + j).focus();
+                    alert('A mező nem lehet üres!');
+                    return false;                    
+                }
+
+                if (j < i && parseInt($("#maxregiseg_" + j).val()) <= parseInt($("#minregiseg_" + j).val())) {
+                    $("#maxregiseg_" + j).css('border', '1px solid #a94442');
+                    $("#maxregiseg_" + j).focus();
+                    alert('A mező értéke nagyobb kell legyen, mint a kezdőérték!');
+                    return false;                    
+                }
+
+                var ok = /^\d*\.?\d{0,2}$/.test($("#fizetes_" + j).val());
+                if ($("#fizetes_" + j).val() == '' || !ok) {
+                    $("#fizetes_" + j).css('border', '1px solid #a94442');
+                    $("#fizetes_" + j).focus();
+                    alert('A megadott érték helytelen!');
+                    return false;
+                }
+                
+                var ok1 = /^\d*\.?\d{0,2}$/.test($("#szazalek_" + j).val());
+                if ($("#szazalek_" + j).val() == '' || !ok1) {
+                    $("#szazalek_" + j).css('border', '1px solid #a94442');
+                    $("#szazalek_" + j).focus();
+                    alert('A megadott érték helytelen!');
+                    return false;
+                }                
+            }
+            
+            for (var j = 2; j <= i; j++) {
+                if ($("#minregiseg_" + j).val() < $("#maxregiseg_" + (j-1)).val()) {
+                    $("#minregiseg_" + j).css('border', '1px solid #a94442');
+                    $("#minregiseg_" + j).focus();
+                    alert('Az időszakok folytatólagosak kell legyenek!');
+                    return false;
+                }
+            }
+            
+            var data = $("#fizeteskategoria_form").serializeArray();
+            data.push({'name' : 'munkastipus', value : $("#munkastipus").val()});
+            data.push({'name' : 'hely', value : $("#hely").val()});
+            
+            $.post($("#save_fizeteskategoria_url").html(), data, function() {
+                $.sticky('A művelet sikeresen végrehajtódótt', {classList: 'success', autoclose: 4000,  position: 'top-right'});
+            });            
+        });
+
+        $("body").on('click', '#uj_kateg', function() {
+            $("#rowcount").val(parseInt($("#rowcount").val()) + 1);
+            var i = $("#rowcount").val();
+            
+            var row =
+            '<tr id="fizeteskategoria_row_'+i+'">\n' + 
+                '<td><label><nobr>Régiség (hónap):</nobr></label></td>\n' +
+                '<td><input id="minregiseg_'+i+'" class="form-control" min="0" type="number"></td>\n' +
+                '<td>-</td>\n' +
+                '<td><input id="maxregiseg_'+i+'" class="form-control" min="0" type="number"></td>\n' +
+                '<td><label><nobr>&nbsp;&nbsp;Fizetés (RON): </nobr></label></td>\n' +
+                '<td><input id="fizetes_'+i+'" class="form-control" type="text"></td>\n' +
+                '<td>+</td>\n' +
+                '<td><input id="szazalek_'+i+'" class="form-control" type="text"></td>\n' +
+                '<td><label>%&nbsp;&nbsp;</label></td>\n' +
+                '<td><a href="javascript:void(0)" id="torol_kat_'+i+'" title="Törlés">\n' +
+                    '<span class="glyphicon glyphicon-remove"></span>\n' +
+                '</a></td>\n' +
+            '</tr>';
+            
+            if (i == '1') {
+                $("#fizeteskategoria_table > tbody:last").append(row);
+            } else
+                $("#fizeteskategoria_row_" + (i-1)).after(row);
+        });
+        
+        $("body").on('click', '[id^="torol_kat_"]', function() {
+            var current = $(this).attr('id').replace('torol_kat_', '');
+            $(this).closest('tr').remove();
+            
+            var i = $("#rowcount").val();
+            for (var j = parseInt(current) + 1; j <= i; j++) {
+                $("#fizeteskategoria_row_" + j).attr('name', 'fizeteskategoria_row_' + (j-1));
+                $("#fizeteskategoria_row_" + j).attr('id', 'fizeteskategoria_row_' + (j-1));
+                
+                $("#minregiseg_" + j).attr('name', 'minregiseg_' + (j-1));
+                $("#minregiseg_" + j).attr('id', 'minregiseg_' + (j-1));
+                
+                $("#maxregiseg_" + j).attr('name', 'maxregiseg_' + (j-1));
+                $("#maxregiseg_" + j).attr('id', 'maxregiseg_' + (j-1));
+                
+                $("#fizetes_" + j).attr('name', 'fizetes_' + (j-1));                
+                $("#fizetes_" + j).attr('id', 'fizetes_' + (j-1));
+                
+                $("#szazalek_" + j).attr('name', 'szazalek_' + (j-1));
+                $("#szazalek_" + j).attr('id', 'szazalek_' + (j-1));
+                
+                $("#torol_kat_" + j).attr('name', 'torol_kat_' + (j-1));
+                $("#torol_kat_" + j).attr('id', 'torol_kat_' + (j-1));
+            }
+            
+            $("#rowcount").val(parseInt($("#rowcount").val()) - 1);
+            
+        });
+    });
+</script>

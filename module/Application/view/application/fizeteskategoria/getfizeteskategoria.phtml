@@ -1,0 +1,37 @@
+<a href="javascript:void(0)" id="uj_kateg">
+    <span class="glyphicon glyphicon-plus"></span> <?php echo $this->translate('Új időszakasz hozzáadása'); ?>
+</a>
+<br /><br />
+
+<form class="form-inline" role="form" id="fizeteskategoria_form">
+    <table id="fizeteskategoria_table">
+        <tbody>
+            <?php
+            $i = 0;
+            foreach ($fizeteskategoriak as $kategoria) {
+                $i++;
+                ?>
+                <tr id="fizeteskategoria_row_<?php echo $i ?>">
+                    <td><label><nobr><?php echo $this->translate('Régiség (hónap):'); ?></nobr></label></td>
+                    <td><input name="minregiseg_<?php echo $i ?>" id="minregiseg_<?php echo $i ?>" class="form-control" min="0" type="number" value="<?php echo $kategoria->getMinregisegHo() ?>" /></td>
+                    <td>-</td>
+                    <td><input name="maxregiseg_<?php echo $i ?>" id="maxregiseg_<?php echo $i ?>" class="form-control" min="0" type="number" value="<?php echo $kategoria->getMaxregisegHo() ? $kategoria->getMaxregisegHo() : '' ?>" /></td>
+                    <td><label><nobr>&nbsp;&nbsp;<?php echo $this->translate('Fizetés (RON): '); ?></nobr></label></td>
+                    <td><input name="fizetes_<?php echo $i ?>" id="fizetes_<?php echo $i ?>" class="form-control" type="text" value="<?php echo $kategoria->getFizetes() ?>" /></td>
+                    <td>+</td>
+                    <td><input name="szazalek_<?php echo $i ?>" id="szazalek_<?php echo $i ?>" class="form-control" type="text" value="<?php echo $kategoria->getSzazalek() ?>" /></td>
+                    <td><label><?php echo $this->translate('%'); ?>&nbsp;&nbsp;</label></td>
+                    <td>
+                        <a href="javascript:void(0)" id="torol_kat_<?php echo $i ?>" title="<?php echo $this->translate('Törlés'); ?>">
+                            <span class="glyphicon glyphicon-remove"></span>
+                        </a>
+                    </td>
+                </tr>
+                <?php
+            }
+            ?>
+        </tbody>
+    </table>
+    <input type="hidden" name="rowcount" value="<?php echo $i ?>" id="rowcount" />
+    <input id="save_fizeteskategoria" type="button" value="<?php echo $this->translate('Mentés') ?>" class="btn btn-primary" />
+</form>

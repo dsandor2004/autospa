@@ -1,0 +1,264 @@
+<h2><?php echo $this->translate('Leltár') ?></h2>
+<hr />
+<div class="hide" id="modal_title_new"><?php echo $this->translate('Új áru'); ?></div>
+<div class="hide" id="torol_confirm_text"><?php echo $this->translate('Biztosan törlöd az árut?'); ?></div>
+<div class="hide" id="modal_title_edit"><?php echo $this->translate('Áru módosítása'); ?></div>
+<div class="hide" id="modal_getformurl"><?php echo $this->url('aru', array('action' => 'getform')) ?></div>
+<div class="hide" id="modal_saveformurl"><?php echo $this->url('aru', array('action' => 'saveform')) ?></div>
+<div class="hide" id="delete_url"><?php echo $this->url('aru', array('action' => 'delete')) ?></div>
+<div class="hide" id="ajax_error_message"><?php echo $this->translate('Hiba! A műveletet nem sikerült végrehajtani!'); ?></div>
+<div class="hide" id="saveFormCallbackFuncName">saveAruCallback</div>
+
+<input type="hidden" id="isAllowedEdit" value="<?php echo ($this->isAllowed('aru', 'modosit') ? 1 : 0); ?>" />
+<input type="hidden" id="isAllowedDelete" value="<?php echo ($this->isAllowed('aru', 'torol') ? 1 : 0); ?>" />
+       
+<?php $dataTableId = 'aruk_table' ?>
+
+<div style="float:left">
+<?php
+if ($this->isAllowed('aru', 'letrehoz')) :
+    ?>
+    <a href="javascript:void(0)" class="create_edit" id="object_0">
+        <span class="glyphicon glyphicon-plus"></span> <?php echo $this->translate('Új Áru'); ?>
+    </a>
+    <br /><br />
+    <?php
+endif;
+?>
+</div>
+<div style="float:right">
+	<a href="javascript:void(0)" id="leltar_keszletmodositas">
+		<span class="glyphicon glyphicon-pencil "></span> <?php echo $this->translate('Készletmódosítás'); ?>
+	</a>
+	<button type="button" class="btn btn-default megsem_leltar hide"><?php echo $this->translate('Mégsem') ?></button>
+	<button type="button" class="btn btn-primary keszlet_mentes hide"><?php echo $this->translate('Készlet mentés') ?></button>
+</div>
+<div style="clear:both"></div>
+
+<table id="<?php echo $dataTableId ?>" class="table table-striped table-bordered myDataTable" width="100%">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th><nobr><?php echo $this->translate('Áru'); ?></nobr></th>
+            <th><?php echo $this->translate('Ekezet nelkuli nev'); ?></th>
+            <th><?php echo $this->translate('Vételár'); ?></th>
+			<th><?php echo $this->translate('Eladási ár'); ?></th>
+			<th><?php echo $this->translate('Pillanatyi db'); ?></th>
+            <th><?php echo $this->translate('Műveletek'); ?></th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php
+        if (count($aruk)) :
+			$kavekellekek = array(
+				\Application\Entity\Aru::KAVE_ID,
+				\Application\Entity\Aru::CUKOR_ID,
+				\Application\Entity\Aru::POHAR_ID,
+				\Application\Entity\Aru::POHARFEDO_ID,
+				\Application\Entity\Aru::TEJ_ID,
+			);
+		
+            foreach ($aruk as $aru) {
+                $nev = $this->escapeHtml($aru['nev']);
+				?>
+                <tr>
+                    <td><?php echo $aru['id'] ?></td>
+                    <td><?php echo $nev ?></td>
+                    <td><?php echo $this->accent_trimmer($this->escapeHtml($aru['nev'])) ?></td>
+                    <td><?php echo $this->escapeHtml($aru['vetelar']) ?></td>
+					<td><?php echo $this->escapeHtml($aru['eladasiar']) ?></td>
+					<td id="darab_<?php echo $aru['id']; ?>"><?php echo $this->escapeHtml($aru['darab']) ?></td>
+                    <td>
+                        <?php
+                        if ($this->isAllowed('aktivitas', 'modosit')) :
+                                ?>
+                                <a href="javascript:void(0)" class="create_edit" id="object_<?php echo $aru['id'] ?>" title="<?php echo $this->translate('Módosítás'); ?>">
+                                    <span class="glyphicon glyphicon-pencil"></span>
+                                </a>
+                                <?php
+                        endif;
+
+                        if ($this->isAllowed('aktivitas', 'torol') && !in_array($aru['id'], $kavekellekek)) :
+                            ?>
+                            <a href="javascript:void(0)" class="torol" id="object_torol_<?php echo $aru['id'] ?>" title="<?php echo $this->translate('Törlés'); ?>">
+                                <span class="glyphicon glyphicon-remove"></span>
+                            </a>
+                            <?php
+                        endif;
+                        ?>
+                    </td>
+                </tr>
+                <?php
+            }
+        endif;
+        ?>        
+    </tbody>
+</table>
+
+<button type="button" class="btn btn-default megsem_leltar hide"><?php echo $this->translate('Mégsem') ?></button>
+<button type="button" class="btn btn-primary keszlet_mentes hide"><?php echo $this->translate('Készlet mentés') ?></button>
+<?php echo $this->partial('/application/partial_modal.phtml'); ?>
+
+<h2><?php echo $this->translate('Áruforgás') ?></h2>
+<hr />
+
+<?php
+$now = new \DateTime();
+?>
+<a id="mai_nap" href="javascript:void(0)" class="btn btn-info"><?php echo $this->translate('Mai nap') ?></a>
+<br /><br />
+<form class="form-inline" role="form" id="interval_selector">
+  <div class="form-group">
+    <label class="sr-only" for="from"></label>
+    <input type="date" class="form-control" id="from" name="from" value="<?php echo $from; ?>" />
+  </div>
+  -
+  <div class="form-group">
+    <label class="sr-only" for="to"></label>
+    <input type="date" class="form-control" id="to" name="to" value="<?php echo $to; ?>" />
+  </div>
+  
+  <div class="form-group">
+    <label for="selectedAru" class="sr-only">&nbsp;</label>
+    <select id="selectedAru" name="aruk" class="form-control" style="width: 200px">
+        <option value=""><?php echo $this->translate('Összes') ?></option>
+		<?php
+		foreach ($aruk as $aru) {
+			?>
+			<option <?php if ($selectaru == $aru['id']) echo 'selected="selected"' ?> value="<?php echo $aru['id'] ?>"><?php echo $aru['nev'] ?></option>
+			<?php
+		}
+		?>
+    </select>      
+  </div>
+  
+  <a id="aruforgas_get" href="javascript:void(0)" class="btn btn-info"><?php echo $this->translate('Keresés') ?></a>
+  
+</form>
+<br />
+<div class="ajax_loader"></div>
+<div id="aruforgas_osszesito"></div>
+<br />
+
+<script>
+$(document).ready(function() {
+	$("#<?php echo $dataTableId ?>").dataTable({
+		language: {
+			url: '/js/DataTables-1.10.2/localization/Hungarian.json'
+		},
+		"order": [[ 1, "asc"]],
+		"columnDefs": [
+			{
+				"targets": [2],
+				"visible": false,
+			},
+
+			{
+				"type": "formatted-num",
+				"targets": [3],
+			},
+
+			{ "orderable": false, "targets": [6] }
+		],
+		aLengthMenu: [
+			[10, 100, 200, -1],
+			[10, 100, 200, "Összes"]
+		],			
+		iDisplayLength: 10
+	});
+
+	$("#aruforgas_osszesito").load('/leltar/getaruforgas', function() {
+		$("div.ajax_loader").hide();
+	});
+	
+	$("#leltar_keszletmodositas").click(function() {
+		$(this).addClass('hide');
+		$("#aruk_table_length select").val(-1);
+		$("#aruk_table_length select").trigger('change');
+		$("#aruk_table_length select").prop('disabled', true);
+		$(".pagination").addClass('hide');
+		$(".keszlet_mentes").removeClass('hide');
+		$(".megsem_leltar").removeClass('hide');
+
+		var tabindex = 1;
+		$("[id^='darab_']").each(function(){
+			var origvalue = $(this).text();
+			var input = '<input class="leltar_input_db" type="text" tabindex="'+tabindex+'" origvalue="'+origvalue+'" value="'+origvalue+'" /> ('+origvalue+')';
+			$(this).html(input);
+			tabindex++;
+		});
+	});
+
+	$(".megsem_leltar").click(function() {
+		var r = confirm("Biztosan vissza akarsz lépni?");
+		if (r == true) {
+			location.reload();
+		}
+	});
+
+	$(".keszlet_mentes").click(function() {
+		var r = confirm("Biztosan mented az új értékeket?");
+		if (r == true) {
+			$(".keszlet_mentes").addClass('hide');
+			$(".megsem_leltar").addClass('hide');
+			$("#leltar_keszletmodositas").removeClass('hide');
+			$(".pagination").removeClass('hide');
+			$("#aruk_table_length select").prop('disabled', false);
+			var saveArray = Array();
+			$(".leltar_input_db").each(function() {
+				var _this = $(this);
+				var db = parseInt(_this.val());
+				var origvalue = _this.attr('origvalue');
+
+				if (db != origvalue) {
+					var id = _this.parent().attr('id').replace('darab_', '');
+					saveArray[id] = db;
+				}
+
+				_this.parent().html(db);
+			});
+			console.log(saveArray);
+			if (saveArray.length) {
+				var obj = $.extend({}, saveArray);
+				$.post('/leltar/saveleltar', obj, function() {
+					$.sticky($("#modal_success").html(), {classList: 'success', autoclose: 4000,  position: 'top-right'});
+					$("#aruforgas_get").trigger('click');
+				});
+			}
+		}
+	});
+
+	$("body").on("click", ".leltar_input_db", function () {
+		$(this).select();
+	});
+
+	$("body").on("keyup", ".leltar_input_db", function () {
+		var val = $(this).val();
+		if (val != val.replace(/[^0-9]/g, '')) {
+		   $(this).val(val.replace(/[^0-9]/g, ''));
+		}
+	});
+	
+	$("#aruk").select2();
+	
+	$("#mai_nap").click(function() {
+		$("div.ajax_loader").show();
+		$("#aruforgas_osszesito").html('');
+		$("#from").val('<?php echo $now->format('Y-m-d') ?>');
+		$("#to").val('<?php echo $now->format('Y-m-d') ?>');
+		$("#aruforgas_osszesito").load('/leltar/getaruforgas?selectedAru='+ $("#selectedAru").val(), function() {
+			$("div.ajax_loader").hide();
+		});
+	});
+
+	$("#aruforgas_get").click(function() {
+		$("div.ajax_loader").show();
+		$("#aruforgas_osszesito").html('');
+		var from = $("#from").val();
+		var to = $("#to").val();
+		$("#aruforgas_osszesito").load('/leltar/getaruforgas?selectedAru='+ $("#selectedAru").val()+'&from='+from+'&to='+to, function() {
+			$("div.ajax_loader").hide();
+		});
+	});
+});
+</script>

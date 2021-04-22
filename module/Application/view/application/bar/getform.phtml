@@ -1,0 +1,92 @@
+<?php
+if ($modosithato) {
+	$form->prepare();
+	echo $this->form()->openTag($form);
+	?>
+	<?php echo $this->formRow($form->get('id')); ?>
+
+		<div class="form-group">
+			<?php echo $this->formRow($form->get('aru')); ?>
+			<span class="help-block" id="help_<?php echo $form->get('aru')->getAttribute('id') ?>"></span>
+		</div>
+
+		<?php
+		if (!$form->get('aru')->getValue() && $form->get('aru')->getValue() != \Application\Entity\Aru::KAVE_ID) :
+			$kaveHozzavalokHide = 'hide';
+		endif;
+		?>
+
+		<div class="<?php echo $kaveHozzavalokHide ?>" id="kavehozzavalok_holder">
+			<div class="form-group">
+				<?php echo $this->formRow($form->get('kavefajta')); ?>
+				<span class="help-block" id="help_<?php echo $form->get('kavefajta')->getAttribute('id') ?>"></span>
+			</div>
+			<div class="form-group">
+				<?php echo $this->formRow($form->get('cukor')); ?>
+				<span class="help-block" id="help_<?php echo $form->get('cukor')->getAttribute('id') ?>"></span>
+			</div>
+			<div class="row">
+				<div class="col-md-6">
+					<?php echo $this->formCheckbox($form->get('pohar')) ?>
+					<label for="pohar"><?php echo $form->get('pohar')->getLabel() ?></label>				
+				</div>
+				<div class="col-md-6">
+					<?php echo $this->formCheckbox($form->get('poharfedo')) ?>
+					<label for="poharfedo"><?php echo $form->get('poharfedo')->getLabel() ?></label>				
+				</div>
+			</div>			
+		</div>
+
+		<div class="form-group">
+			<?php echo $this->formRow($form->get('darab')); ?>
+			<span class="help-block" id="help_<?php echo $form->get('darab')->getAttribute('id') ?>"></span>
+		</div>
+
+		<div class="form-group">
+			<?php echo $this->formRow($form->get('tipus')); ?>
+			<span class="help-block" id="help_<?php echo $form->get('tipus')->getAttribute('id') ?>"></span>
+		</div>
+
+		<?php
+		if (!$form->get('munkas')->getValue()) :
+			$munkasHide = 'hide';
+		endif;
+		?>
+		<div class="form-group <?php echo $munkasHide ?>" id="munkas_holder">
+			<?php echo $this->formRow($form->get('munkas')); ?>
+			<span class="help-block" id="help_<?php echo $form->get('munkas')->getAttribute('id') ?>"></span>
+		</div>
+
+		<div class="form-group">
+			<?php echo $this->formRow($form->get('megjegyzes')); ?>
+			<span class="help-block" id="help_<?php echo $form->get('megjegyzes')->getAttribute('id') ?>"></span>
+		</div>
+
+	<?php echo $this->form()->closeTag($form); ?>
+
+	<script>
+		$(document).ready(function() {
+			$("#aru").select2();
+
+			$("#aru").change(function() {
+				if ($(this).val() == '<?php echo \Application\Entity\Aru::KAVE_ID ?>')
+					$("#kavehozzavalok_holder").removeClass('hide');
+				else
+					$("#kavehozzavalok_holder").addClass('hide');
+			});
+
+			$("#tipus").change(function() {
+				if ($(this).val() == '<?php echo \Application\Entity\Aruforgas::TIPUS_MUNKASNAK ?>')
+					$("#munkas_holder").removeClass('hide');
+				else
+					$("#munkas_holder").addClass('hide');
+			});
+		});
+	</script>
+	<?php
+} else {
+    ?>
+    <div class="error-text"><?php echo $this->translate('Ezt az árulást már nem módosíthatod!'); ?></div>
+    <?php
+}
+?>

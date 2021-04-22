@@ -1,0 +1,108 @@
+<?php echo $this->doctype(); ?>
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <?php echo $this->headTitle('ZF2 '. $this->translate('AutoSpa'))->setSeparator(' - ')->setAutoEscape(false) ?>
+
+        <?php echo $this->headMeta()
+            ->appendName('viewport', 'width=device-width, initial-scale=1.0')
+            ->appendHttpEquiv('X-UA-Compatible', 'IE=edge')
+        ?>
+
+        <!-- Le styles -->
+        <?php echo $this->headLink(array('rel' => 'shortcut icon', 'type' => 'image/vnd.microsoft.icon', 'href' => $this->basePath() . '/img/favicon.ico'))
+                        ->prependStylesheet($this->basePath() . '/js/DataTables-1.10.2/plugins/integration/bootstrap/3/dataTables.bootstrap.css')
+                        ->prependStylesheet($this->basePath() . '/css/style.css')
+                        ->prependStylesheet($this->basePath() . '/js/sticky/sticky.css')
+                        ->prependStylesheet($this->basePath() . '/js/select2/select2.css')
+                        ->prependStylesheet($this->basePath() . '/js/select2/select2-bootstrap.css')
+                        ->prependStylesheet($this->basePath() . '/css/bootstrap-theme.min.css')
+                        ->prependStylesheet($this->basePath() . '/css/bootstrap.min.css') ?>
+
+        <!-- Scripts -->
+        <?php echo $this->headScript()
+            ->prependFile($this->basePath() . '/js/script.js')
+            ->prependFile($this->basePath() . '/js/select2/select2.min.js')
+            ->prependFile($this->basePath() . '/js/DataTables-1.10.2/plugins/sorting/formatted-numbers.js')
+            ->prependFile($this->basePath() . '/js/DataTables-1.10.2/plugins/api/sum().js')
+            ->prependFile($this->basePath() . '/js/DataTables-1.10.2/plugins/integration/bootstrap/3/dataTables.bootstrap.js')
+            ->prependFile($this->basePath() . '/js/DataTables-1.10.2/js/jquery.dataTables.js')
+            ->prependFile($this->basePath() . '/js/sticky/sticky.min.js')                
+            ->prependFile($this->basePath() . '/js/bootstrap.min.js')
+            ->prependFile($this->basePath() . '/js/jquery.min.js')
+            ->prependFile($this->basePath() . '/js/respond.min.js', 'text/javascript', array('conditional' => 'lt IE 9',))
+            ->prependFile($this->basePath() . '/js/html5shiv.js',   'text/javascript', array('conditional' => 'lt IE 9',))
+                
+        ; ?>
+
+    </head>
+    <body>
+        <div class="hide" id="gethomewarningcount"><?php echo $this->url('munkas', array('action' => 'gethomewarningcount')) ?></div>
+        <nav class="navbar navbar-default navbar-fixed-top bg-primary" role="navigation">
+            <div class="container">
+                
+                <?php
+                if ($this->zfcUserIdentity()) {
+                    ?>
+                    
+                    <div class="navbar-header">
+                        <a class="navbar-brand" href="<?php echo $this->url('home') ?>">
+                            <span class="glyphicon glyphicon-home"></span>
+                            <span id="home_warning_count"><!-- Remote value --></span>
+                        </a>
+                    </div>
+                
+                    <ul class="nav navbar-right bg-primary">
+                        <li>
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" id="loginDropdown">
+                                <?php echo $this->zfcUserDisplayName() ?> <span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu" role="menu" aria-labeledby="loginDropdown">
+                                <li role="presentation">
+                                    <a role="menuitem" tabindex="-1" href="<?php echo $this->url('zfcuser/logout') ?>">
+                                        <?php echo $this->translate('Kijelentkezés'); ?>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <?php
+                }
+                ?>
+            </div>
+        </nav>
+        <div class="container">
+            <div class="row">
+                <?php
+                if ($this->zfcUserIdentity()) {
+                    ?>
+                    <div class="col-md-2 sidebar">
+                        <ul class="nav nav-sidebar">
+                            <?php echo $this->navigation('navigation')->menu(); ?>
+                        </ul>
+                    </div>
+
+                    <div class="col-md-10 main">
+                        <?php echo $this->content; ?>
+                    </div>
+                    <?php
+                } else {
+                    echo $this->content;
+                }
+                ?>
+            </div>
+            
+            <hr>
+            <footer>
+            </footer>
+        </div> <!-- /container -->
+        <?php echo $this->inlineScript() ?>
+        
+        <script>
+            $(document).ready(function() {
+                $("#home_warning_count").load($("#gethomewarningcount").html());                
+            });
+        </script>
+    </body>
+</html>

@@ -1,0 +1,46 @@
+<?php
+
+namespace Application\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * Autokoltseg
+ *
+ * @ORM\Table(name="autokoltseg", uniqueConstraints={@ORM\UniqueConstraint(name="UNIQ_1B5E23014F047D61", columns={"koltsegnev"})})
+ * @ORM\Entity
+ */
+class Autokoltseg
+{
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="id", type="integer", nullable=false)
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="IDENTITY")
+     */
+    private $id;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="koltsegnev", type="string", length=255, nullable=true)
+     */
+    private $koltsegnev;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="osszeg", type="decimal", precision=10, scale=2, nullable=false)
+     */
+    private $osszeg;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="datum", type="date", nullable=false)
+     */
+    private $datum;
+
+
+}

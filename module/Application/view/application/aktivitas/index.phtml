@@ -1,0 +1,301 @@
+<h2><?php echo $cash == 2 ? $this->translate('Kifizetetlen aktivitások') : $this->translate('Aktivitások') ?></h2>
+<hr />
+<div class="hide" id="modal_title_new"><?php echo $this->translate('Új aktivitás'); ?></div>
+<div class="hide" id="torol_confirm_text"><?php echo $this->translate('Biztosan törlöd az aktivitást?'); ?></div>
+<div class="hide" id="mass_kifizetes_confirm_text"><?php echo $this->translate('aktivitás válik kifizetetté. Biztosan végrehajtod a műveletet?'); ?></div>
+<div class="hide" id="modal_title_edit"><?php echo $this->translate('Aktivitás adatainak módosítása'); ?></div>
+<div class="hide" id="modal_getformurl"><?php echo $this->url('aktivitas', array('action' => 'getform')) ?></div>
+<div class="hide" id="modal_saveformurl"><?php echo $this->url('aktivitas', array('action' => 'saveform')) ?></div>
+<div class="hide" id="mass_kifizetes_url"><?php echo $this->url('aktivitas', array('action' => 'masskifizetes')) ?></div>
+<div class="hide" id="delete_url"><?php echo $this->url('aktivitas', array('action' => 'delete')) ?></div>
+<div class="hide" id="ajax_error_message"><?php echo $this->translate('Hiba! A műveletet nem sikerült végrehajtani!'); ?></div>
+<div class="hide" id="saveFormCallbackFuncName">saveAktivitasCallback</div>
+
+<input type="hidden" id="isAllowedEdit" value="<?php echo ($this->isAllowed('aktivitas', 'modosit') ? 1 : 0); ?>" />
+<input type="hidden" id="isAllowedDelete" value="<?php echo ($this->isAllowed('aktivitas', 'torol') ? 1 : 0); ?>" />
+<input type="hidden" id="isAllowedFizet" value="<?php echo ($this->isAllowed('aktivitas', 'fizet') ? 1 : 0); ?>" />
+       
+<?php $dataTableId = 'aktivitasok_table' ?>
+
+<?php
+if ($this->isAllowed('aktivitas', 'letrehoz')) :
+    ?>
+
+    <a href="javascript:void(0)" class="create_edit" id="object_0">
+        <span class="glyphicon glyphicon-plus"></span> <?php echo $this->translate('Új aktivitás'); ?>
+    </a>
+    <br /><br />
+    <?php
+endif;
+?>
+
+<?php
+$now = new \DateTime();
+$last7days = new \DateTime();
+$last7days = $last7days->modify('-1 week');
+$last30days = new \DateTime();
+$last30days = $last30days->modify('-1 month');
+?>
+<a id="mai_nap" href="javascript:void(0)" class="btn btn-info"><?php echo $this->translate('Mai nap') ?></a>
+<a id="utolso_het" href="javascript:void(0)" class="btn btn-info"><?php echo $this->translate('Utolsó 1 hét') ?></a>
+<a id="utolso_honap" href="javascript:void(0)" class="btn btn-info"><?php echo $this->translate('Utolsó 1 hónap') ?></a>
+<?php
+if ($kifizetetlenCount) :
+    ?>
+    <a id="kifizetetlen_link" href="javascript:void(0)" class="btn btn-info">
+        <?php echo $this->translate('Összes kifizetetlen') ?>
+    </a>
+    <span id="kifizetetlen_count_holder" class="button_counter"><b><span id="kifizetetlen_count"><?php echo $kifizetetlenCount ?></span></b></span>
+    <?php
+endif;
+?>
+<br /><br />
+
+<form class="form-inline" role="form" id="interval_selector">
+  <div class="form-group">
+    <label class="sr-only" for="from"></label>
+    <input type="date" class="form-control" id="from" name="from" value="<?php echo $from; ?>" />
+  </div>
+  -
+  <div class="form-group">
+    <label class="sr-only" for="to"></label>
+    <input type="date" class="form-control" id="to" name="to" value="<?php echo $to; ?>" />
+  </div>
+  
+  <div class="form-group">
+    <label for="cash" class="sr-only">&nbsp;</label>
+    <select id="cash" name="cash" class="form-control">
+        <option value=""><?php echo $this->translate('Összes') ?></option>
+        <option <?php if ($cash == '0') echo 'selected="selected"' ?> value="0"><?php echo $this->translate('Fisa') ?></option>
+        <option <?php if ($cash == '1') echo 'selected="selected"' ?> value="1"><?php echo $this->translate('Cash') ?></option>
+        <option <?php if ($cash == '2') echo 'selected="selected"' ?> value="2"><?php echo $this->translate('Kifizetetlen') ?></option>
+    </select>      
+  </div>
+  
+  <button type="submit" class="btn btn-info"><?php echo $this->translate('Keresés') ?></button>
+</form>
+<br />
+<?php
+if ($barosReszesedes != "") {
+	echo '<b>'.$this->translate('A báros részesedése erre a napra ('.$from.'): ') . number_format($barosReszesedes, 2) . ' RON</b><br><br>';
+}
+?>
+<div class="ajax_loader"></div>
+<table id="<?php echo $dataTableId ?>" class=" hide table table-striped table-bordered myDataTable" width="100%">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th><nobr><?php echo $this->translate('Aktivitás neve'); ?></nobr></th>
+            <th><?php echo $this->translate('Ekezet nelkuli nev'); ?></th>
+            <th><?php echo $this->translate('Ár'); ?></th>
+            <th><?php echo $this->translate('Penznem nelkuli Ár'); ?></th>
+            <th><?php echo $this->translate('Időpont'); ?></th>
+            <th><?php echo $this->translate('Rendszám'); ?></th>
+            <th><?php echo $this->translate('Cég'); ?></th>
+            <th><?php echo $this->translate('Ekezet nelkuli cegnev'); ?></th>
+            <th><?php echo $this->translate('Munkások'); ?></th>
+            <th><?php echo $this->translate('Kellékek'); ?></th>
+            <th><?php echo $this->translate('Típus'); ?></th>
+            <th><?php echo $this->translate('Helyszín'); ?></th>
+            <th><?php echo $this->translate('Ekezet nelkuli Helyszín'); ?></th>
+            <th><?php echo $this->translate('Műveletek'); ?></th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php
+        if (count($aktivitasok)) :
+            foreach ($aktivitasok as $aktivitas) {
+                $nev = $this->escapeHtml($aktivitas->getNev());
+                if ($aktivitas->getViasz())
+                    $nev .= ' + Viasz';
+                ?>
+                <tr>
+                    <td><?php echo $aktivitas->getId() ?></td>
+                    <td><?php echo $nev ?></td>
+                    <td><?php echo $this->accent_trimmer($this->escapeHtml($aktivitas->getNev())) ?></td>
+                    <td><nobr><?php echo $this->escapeHtml($aktivitas->getAr()) ?> RON</nobr></td>
+                    <td><?php echo $this->escapeHtml($aktivitas->getAr()) ?></td>
+                    <td><?php echo $aktivitas->getIdopont()->format('Y-m-d'); ?></td>
+                    <td><?php echo $this->escapeHtml($aktivitas->getRendszam()) ?></td>
+                    <td><?php echo $aktivitas->getCeg() ? $this->escapeHtml($aktivitas->getCeg()->getCegName()) : '-' ?></td>
+                    <td><?php echo $aktivitas->getCeg() ? $this->accent_trimmer($this->escapeHtml($aktivitas->getCeg()->getCegName())) : '-' ?></td>
+                    <td><?php echo $aktivitas->getMunkasokString() ?></td>
+                    <td><?php echo $aktivitasKellekekArray[$aktivitas->getId()] ? $this->escapeHtml(implode(', ' ,$aktivitasKellekekArray[$aktivitas->getId()])) : '' ?></td>
+                    <td><?php echo $this->escapeHtml($aktivitas->getTipusString()) ?></td>
+                    <td><?php echo $this->escapeHtml($aktivitas->getHelyString()) ?></td>
+                    <td><?php echo $this->accent_trimmer($this->escapeHtml($aktivitas->getHelyString())) ?></td>
+                    <td>
+                        <?php
+                        if ($this->isAllowed('aktivitas', 'modosit') && (!$login->hasRole(\SamUser\Entity\Role::ROLE_NAME_BAROS) && !$login->hasRole(\SamUser\Entity\Role::ROLE_NAME_UGYVEZETO) || $aktivitas->isEditableAndDeletable())) :
+                                ?>
+                                <a href="javascript:void(0)" class="create_edit" id="object_<?php echo $aktivitas->getId() ?>" title="<?php echo $this->translate('Módosítás'); ?>">
+                                    <span class="glyphicon glyphicon-pencil"></span>
+                                </a>
+                                <?php
+                        endif;
+
+                        if ($this->isAllowed('aktivitas', 'torol') && (!$login->hasRole(\SamUser\Entity\Role::ROLE_NAME_BAROS) && !$login->hasRole(\SamUser\Entity\Role::ROLE_NAME_UGYVEZETO) || $aktivitas->isEditableAndDeletable())) :
+                            ?>
+                            <a href="javascript:void(0)" class="torol" id="object_torol_<?php echo $aktivitas->getId() ?>" title="<?php echo $this->translate('Törlés'); ?>">
+                                <span class="glyphicon glyphicon-remove"></span>
+                            </a>
+                            <?php
+                        endif;
+                        
+                        if ($aktivitas->getStatus() == \Application\Entity\Aktivitas::STATUS_OPEN && $this->isAllowed('aktivitas', 'fizet')) :
+                            ?>
+                            <a href="javascript:void(0)" id="aktivitas_fizet_<?php echo $aktivitas->getId() ?>" class="btn btn-default">
+                                <?php echo $this->translate('Fizet'); ?>
+                            </a>
+                            <?php
+                        endif;
+                        ?>
+                    </td>
+                </tr>
+                <?php
+            }
+        endif;
+        ?>        
+    </tbody>
+    <tfoot>
+        <tr>
+            <th colspan="15">
+				<?php
+				echo $this->translate('Összeg:') . ' <span id="vegosszeg">' . number_format($osszHo, 2) . '</span> RON';
+				?>
+			</th>
+        </tr>
+    </tfoot>
+</table>
+
+<?php
+if ($cash == 2 && $kifizetetlenCount) {
+    ?>
+    <a href="javascript:void(0)" id="aktivitas_szurt_fizet" class="btn btn-danger">
+        <?php echo $this->translate('Összes kiszűrt aktivitás kifizetése'); ?>
+    </a>
+    <?php
+}
+?>
+<?php echo $this->partial('/application/partial_modal.phtml'); ?>
+
+<script>
+    $(document).ready(function() {
+        $("#<?php echo $dataTableId ?>").dataTable({
+            "order": [[ 5, "desc" ]],
+            drawCallback: function () {
+                  var api = this.api();
+                  var sum;
+                  if(api.column(4, {filter:'applied'}).data().length)
+                      sum = api.column(4, {filter:'applied'}).data().sum();
+                  else
+                      sum = 0;
+                    $("#vegosszeg").html(sum);
+					
+					$("div.ajax_loader").hide();
+					$("#<?php echo $dataTableId ?>").removeClass('hide');
+                },     
+            language: {
+                url: '/js/DataTables-1.10.2/localization/Hungarian.json'
+            },
+            "columnDefs": [
+                {
+                    "targets": [0, 2, 4, 8, 13],
+                    "visible": false,
+                },
+                
+                {
+                    "type": "formatted-num",
+                    "targets": [3],
+                },
+                
+                { "orderable": false, "targets": [9, 14] }
+            ]            
+        });
+        
+        $("#aktivitas_szurt_fizet").click(function() {
+            var filtered = $(".myDataTable").dataTable()._('tr', {"filter": "applied"});
+            if (filtered.length) {
+                var ids = new Array();
+                for ( var i = 0; i < filtered.length; i++ ) {
+                    var id = filtered[i][0];
+                    ids.push(id);
+                }
+
+                modifyKifizetetlenCounter(ids);
+            }
+        });
+        
+        $("[id^='aktivitas_fizet_']").click(function() {
+            var id = $(this).attr('id').replace('aktivitas_fizet_', '');
+            
+            var ids = new Array();
+            ids.push(id);
+
+            modifyKifizetetlenCounter(ids);
+        });
+        
+        function modifyKifizetetlenCounter(ids)
+        {
+            var text = ids.length + ' ' + $("#mass_kifizetes_confirm_text").text();
+            
+            if (confirm(text)) {
+                <?php 
+                if ($cash == 2) {
+                    ?>
+                    var oTable = $(".myDataTable").DataTable();
+                    for ( var i = 0; i < ids.length; i++ ) {
+                        oTable.row( $("#aktivitas_fizet_" + ids[i]).closest('tr') ).remove();
+                    }
+                    oTable.draw();
+                    <?php
+                } else {
+                    ?>
+                     $("#aktivitas_fizet_" + ids[0]).remove();
+                    <?php
+                }
+                ?>
+
+                $.post($("#mass_kifizetes_url").html(), {'ids' : ids}, function() {    
+                    var kifizetetlen_count = $("#kifizetetlen_count").html();
+                    kifizetetlen_count -= ids.length;
+
+                    if (kifizetetlen_count)
+                        $("#kifizetetlen_count").html(kifizetetlen_count);
+                    else {
+                        $("#kifizetetlen_link").remove();
+                        $("#kifizetetlen_count_holder").remove();
+                    }            
+
+                    $.sticky($("#modal_success").html(), {classList: 'success', autoclose: 4000,  position: 'top-right'});
+                });
+            }
+        }
+        
+        $("#mai_nap").click(function() {
+            $("#from").val('<?php echo $now->format('Y-m-d') ?>');
+            $("#to").val('<?php echo $now->format('Y-m-d') ?>');
+            $("form#interval_selector").submit();
+        });
+
+        $("#utolso_het").click(function() {
+            $("#from").val('<?php echo $last7days->format('Y-m-d') ?>');
+            $("#to").val('<?php echo $now->format('Y-m-d') ?>');
+            $("form#interval_selector").submit();
+        });
+
+        $("#utolso_honap").click(function() {
+            $("#from").val('<?php echo $last30days->format('Y-m-d') ?>');
+            $("#to").val('<?php echo $now->format('Y-m-d') ?>');
+            $("form#interval_selector").submit();
+        });
+        
+        $("#kifizetetlen_link").click(function() {
+            $("#cash").val('2');
+            $("#from").val('2013-01-01');
+            $("#to").val('<?php echo $now->format('Y-m-d') ?>');
+            $("form#interval_selector").submit();
+        });
+
+    });
+</script>

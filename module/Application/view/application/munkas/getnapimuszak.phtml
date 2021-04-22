@@ -1,0 +1,83 @@
+<div id="mai_muszak_holder" class="<?php if (!count($napimuszak)) echo 'hide'; ?>">
+    <?php
+    if ($login->hasRole(\SamUser\Entity\Role::ROLE_NAME_ADMIN)) :
+        ?>
+        <a href="javascript:void(0)" id="edit_napi_muszak">
+            <span class="glyphicon glyphicon-pencil"></span>
+            <?php echo $this->translate('Módosítás') ?>
+        </a>
+        <br /><br/>
+        <?php
+    endif;
+    
+    $napiMunkasHelyszin = array();
+    $napimunkasIds = array();
+    foreach ($napimuszak as $muszak) {
+        $napimunkasIds[] = $muszak->getMunkas()->getId();
+        $napiMunkasHelyszin[$muszak->getMunkas()->getId()] = $muszak->getHely();
+        
+        if ($muszak->getMunkas()->getMunkastipus()->getId() == \Application\Entity\Munkastipus::BAROS_TIPUS_ID)
+            $napiBarosId = $muszak->getMunkas()->getId();
+        ?>
+        <div id="mai_muszak_munkas_<?php echo $muszak->getMunkas()->getId() ?>"><?php echo $muszak->getMunkas()->getName() . ($muszak->getMunkas()->getMunkastipus()->getId() == \Application\Entity\Munkastipus::BAROS_TIPUS_ID ? '' : ' - ' . $muszak->getHelyString()) ?></div>
+        <?php
+    }
+    ?>
+    
+    <input type="hidden" value="<?php echo $napiBarosId ?>" id="napi_baros_val" />
+</div>
+
+<div class="warning_div <?php if (count($napimuszak)) echo 'hide'; ?>" id="napimuszak_warning">
+    <span class="glyphicon glyphicon-exclamation-sign"></span>
+    <?php echo $this->translate('Erre a napra nincs beállítva, hogy ki dolgozik') ?>
+</div>
+
+<form class="<?php if (count($napimuszak)) echo 'hide'; ?>" id="napimuszak_form">    
+    <div class="form-group">
+        <label for="napi_baros"><?php echo $this->translate('Mai báros') ?></label><br>
+        <select class="form-control" name="napi_baros" id="napi_baros">
+            <option value=""><?php echo $this->translate('--Válassz--') ?></option>
+            <?php
+            foreach ($barosokFiko as $munkas) {
+                ?>
+                <option <?php if($munkas->getId() == $napiBarosId) echo 'selected="selected"' ?> value="<?php echo $munkas->getId(); ?>"><?php echo $munkas->getName() ?></option>
+                <?php
+            }
+            ?>
+        </select>
+        <br />
+        
+        <label for="napi_muszakmunkas"><?php echo $this->translate('Fikó') ?></label><br>
+        
+        <?php
+        foreach ($munkasokFiko as $munkas) {
+            ?>
+            <input type="checkbox" value="<?php echo $munkas->getId() ?>" name="napi_muszakmunkas[]" id="napi_muszakmunkas_<?php echo $munkas->getId() ?>" <?php if (in_array($munkas->getId(), $napimunkasIds)) echo 'checked="checked"' ?> /> 
+            <label for="napi_muszakmunkas_<?php echo $munkas->getId() ?>" id="mai_muszakmunkas_nev_<?php echo $munkas->getId() ?>"><?php echo $munkas->getName() ?></label> 
+            <select id="muszakmunkas_hely_<?php echo $munkas->getId() ?>">
+                <option value="<?php echo \Application\Entity\Aktivitas::AKTIVITAS_HELY_FIKO_ID ?>" <?php if (!$napiMunkasHelyszin[$munkas->getId()] || $napiMunkasHelyszin[$munkas->getId()] == \Application\Entity\Aktivitas::AKTIVITAS_HELY_FIKO_ID) echo 'selected="selected"' ?>><?php echo \Application\Entity\Aktivitas::AKTIVITAS_HELY_FIKO ?></option>
+                <option value="<?php echo \Application\Entity\Aktivitas::AKTIVITAS_HELY_KORONKA_ID ?>" <?php if ($napiMunkasHelyszin[$munkas->getId()] == \Application\Entity\Aktivitas::AKTIVITAS_HELY_KORONKA_ID) echo 'selected="selected"' ?>><?php echo \Application\Entity\Aktivitas::AKTIVITAS_HELY_KORONKA ?></option>
+            </select>
+            <br />
+            <?php
+        }
+        ?>
+        <br />
+        
+        <label for="napi_munkasok_koronka" class="sl-only">Koronka</label><br>
+        <?php
+        foreach ($munkasokKoronka as $munkas) {
+            ?>
+            <input type="checkbox" value="<?php echo $munkas->getId() ?>" name="napi_muszakmunkas[]" id="napi_muszakmunkas_<?php echo $munkas->getId() ?>" <?php if (in_array($munkas->getId(), $napimunkasIds)) echo 'checked="checked"' ?> /> 
+            <label for="napi_muszakmunkas_<?php echo $munkas->getId() ?>" id="mai_muszakmunkas_nev_<?php echo $munkas->getId() ?>"><?php echo $munkas->getName() ?></label>
+            <select id="muszakmunkas_hely_<?php echo $munkas->getId() ?>">
+                <option value="<?php echo \Application\Entity\Aktivitas::AKTIVITAS_HELY_FIKO_ID ?>" <?php if ($napiMunkasHelyszin[$munkas->getId()] == \Application\Entity\Aktivitas::AKTIVITAS_HELY_FIKO_ID) echo 'selected="selected"' ?>><?php echo \Application\Entity\Aktivitas::AKTIVITAS_HELY_FIKO ?></option>
+                <option value="<?php echo \Application\Entity\Aktivitas::AKTIVITAS_HELY_KORONKA_ID ?>" <?php if (!$napiMunkasHelyszin[$munkas->getId()] || $napiMunkasHelyszin[$munkas->getId()] == \Application\Entity\Aktivitas::AKTIVITAS_HELY_KORONKA_ID) echo 'selected="selected"' ?>><?php echo \Application\Entity\Aktivitas::AKTIVITAS_HELY_KORONKA ?></option>
+            </select>
+            <br />
+            <?php
+        }
+        ?>
+    </div>
+    <a href="javascript:void(0)" class="btn btn-info" id="napi_mentes"><?php echo $this->translate('Mentés') ?></a> <span class="error-text hide" id="ures_napi"><?php echo $this->translate('Válassz ki legalább egy munkást!') ?></span><span class="error-text hide" id="ures_baros"><?php echo $this->translate('Válaszd ki a ma dolgozó bárost!') ?></span>
+</form>

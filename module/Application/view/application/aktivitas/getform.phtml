@@ -1,0 +1,268 @@
+<?php
+if ($modosithato) {
+    $form->prepare();
+    echo $this->form()->openTag($form);
+    ?>
+    <?php echo $this->formRow($form->get('id')); ?>
+
+    <div class="form-group">
+        <?php echo $this->formRow($form->get('hely')); ?>
+        <span class="help-block" id="help_<?php echo $form->get('hely')->getAttribute('id') ?>"></span>
+    </div>
+
+    <div class="form-group">
+        <?php echo $this->formRow($form->get('tipus')); ?>
+        <span class="help-block" id="help_<?php echo $form->get('tipus')->getAttribute('id') ?>"></span>
+    </div>
+
+    <?php
+    if (!$form->get('ceg')->getValue()) :
+        $cegHide = 'hide';
+    endif;
+    ?>
+    <div class="form-group <?php echo $cegHide ?>" id="ceg_holder">
+        <?php echo $this->formRow($form->get('ceg')); ?>
+        <span class="help-block" id="help_<?php echo $form->get('ceg')->getAttribute('id') ?>"></span>
+        <span id="ceg_rendszamok"></span>
+    </div>
+
+    <div class="form-group <?php echo $szolgaltatasHide ?>" id="szolgaltatas_holder">
+        <?php echo $this->formRow($form->get('szolgaltatas')); ?>
+        <span class="help-block" id="help_<?php echo $form->get('szolgaltatas')->getAttribute('id') ?>"></span>
+    </div>
+
+    <?php
+    if ($form->get('szolgaltatas')->getValue() != '0') :
+        $nevHide = 'hide';
+    endif;
+    ?>
+
+    <div class="form-group <?php echo  $nevHide ?>" id="nev_holder">
+        <?php echo $this->formRow($form->get('nev')); ?>
+        <span class="help-block" id="help_<?php echo $form->get('nev')->getAttribute('id') ?>"></span>
+    </div>
+
+    <div class="form-group">
+		<div class="row">
+			<div class="col-md-6">
+				<?php echo $this->formCheckbox($form->get('viasz')) ?>
+				<label for="viasz"><?php echo $form->get('viasz')->getLabel() ?></label>				
+			</div>
+			<div class="col-md-6">
+				<?php echo $this->formCheckbox($form->get('sma')) ?>
+				<label for="sma"><?php echo $form->get('sma')->getLabel() ?></label>				
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-6">
+				<?php echo $this->formCheckbox($form->get('smac')) ?>
+				<label for="smac"><?php echo $form->get('smac')->getLabel() ?></label>
+			</div>
+			<div class="col-md-6">
+				<?php echo $this->formCheckbox($form->get('ss')) ?>
+				<label for="ss"><?php echo $form->get('ss')->getLabel() ?></label>
+			</div>
+		</div>
+    </div>
+	
+    <?php
+    if ($form->get('szolgaltatas')->getValue() == '') :
+        $arHide = 'hide';
+    endif;
+    ?>
+
+    <div class="form-group <?php echo $arHide ?>" id="ar_holder">
+        <?php echo $this->formRow($form->get('ar')); ?>
+        <span class="help-block" id="help_<?php echo $form->get('ar')->getAttribute('id') ?>"></span>
+    </div>
+
+    <div class="form-group">
+        <?php echo $this->formCheckbox($form->get('status')) ?>
+        <label for="status"><?php echo $form->get('status')->getLabel() ?></label>
+    </div>
+
+    <div class="form-group">
+        <?php echo $this->formRow($form->get('rendszam')); ?>
+        <span class="help-block" id="help_<?php echo $form->get('rendszam')->getAttribute('id') ?>"></span>
+    </div>
+
+    <div class="form-group">
+        <?php echo $this->formRow($form->get('idopont')); ?>
+        <span class="help-block" id="help_<?php echo $form->get('idopont')->getAttribute('id') ?>"></span>
+    </div>
+
+    <div class="form-group">
+        <?php echo $this->formRow($form->get('vulk_20')); ?>
+        <span class="help-block" id="help_<?php echo $form->get('vulk_20')->getAttribute('id') ?>"></span>
+    </div>
+
+    <div class="form-group">
+        <?php echo $this->formCheckbox($form->get('kellek_megkezdve')) ?>
+        <label for="kellek_megkezdve"><?php echo $form->get('kellek_megkezdve')->getLabel() ?></label>
+        <br />
+
+        <?php
+        if ($form->get('kellek_megkezdve')->getValue() == 0) :
+            $kellekekHide = 'hide';
+        endif;
+        ?>
+        <span id="kellekek_holder" class="<?php echo $kellekekHide ?>">
+            <?php //echo $this->formRow($form->get('kellekek'), null, null, '/application/multicheckbox_partial.phtml'); ?>
+            
+            <br />
+            <?php
+            $element = $form->get('kellekek');
+            foreach($element->getValueOptions() as $key => $value) {
+                ?>
+                <div class="row">
+                    <div class="col-md-4">
+                        <input <?php if ($element->getValue() && in_array($value['value'], $element->getValue())) echo "checked='checked'" ?> type="checkbox" id="<?php echo $element->getName() ?>_<?php echo $value['value'] ?>" name="<?php echo $element->getName() ?>[]" value="<?php echo $value['value']; ?>">
+                        <label for="<?php echo $element->getName() ?>_<?php echo $value['value'] ?>"><?php echo $value['label']; ?></label>
+                    </div>
+                    <div class="col-md-4">
+                        <?php
+                        echo $this->formRow($form->get('kellek_munkas_' . $value['value']));
+                        ?>
+                    </div>
+                </div>
+                <?php
+            }
+            ?>
+    </div>
+
+    <div class="form-group munkasok">
+        <label for="munkasok"><?php echo $form->get('munkasok')->getLabel() ?></label>
+        <?php echo $this->formRow($form->get('munkasok'), null, null, '/application/multicheckbox_partial.phtml'); ?>
+        <span class="help-block" id="help_<?php echo $form->get('munkasok')->getAttribute('id') ?>"></span>
+    </div>
+
+    <?php echo $this->form()->closeTag($form); ?>
+
+    <div class="hide" id="aktivitas_getar"><?php echo $this->url('aktivitas', array('action' => 'getar')) ?></div>
+    <div class="hide" id="aktivitas_getfizetesihatarido"><?php echo $this->url('aktivitas', array('action' => 'getfizetesihatarido')) ?></div>
+    <div class="hide" id="ceg_rendszamok_url"><?php echo $this->url('aktivitas', array('action' => 'getrendszamok')) ?></div>
+
+    <script>
+        $(document).ready(function() {
+            var manualPrice = false;
+            var manualFizetve = false;
+            
+            $("#ar").keyup(function(){
+                manualPrice = true;
+            });
+
+            $("#status").click(function() {
+                manualFizetve = true;
+            });
+            
+            $("#ar").click(function(){
+                $(this).select();
+            });
+
+            $("#ceg").select2();
+
+            $("#tipus").change(function() {
+                $("#szolgaltatas").trigger('change');
+
+                setFizetveCheckbox();
+
+                if ($(this).val() == '<?php echo \Application\Entity\Aktivitas::TIPUS_CEG ?>') {
+                    $("#ceg_holder").removeClass('hide');
+                } else {
+                    $("#ceg").select2('val', '');
+                    $("#ceg").val('');
+                    $("#ceg_holder").addClass('hide');                    
+                }            
+            });
+
+            $("#ceg").change(function() {
+                if ($(this).val() != '') {
+                    $.get($("#ceg_rendszamok_url").html(), {"ceg" : $("#ceg").val()}, function(rendszamok) {
+                        $("#ceg_rendszamok").html(rendszamok);
+                    });
+                    
+                    setFizetveCheckbox();
+                    
+                } else {
+                    $("#ceg_rendszamok").html('');
+                }
+
+                if ($("#szolgaltatas").val() != '')
+                    $("#szolgaltatas").trigger('change');
+            });
+
+            $("#viasz, #sma, #smac, #ss").click(function() {
+                $("#szolgaltatas").trigger('change');
+            });
+            
+            $("#szolgaltatas").change(function() {
+                if ($(this).val() == '') {
+                    $("#ar_holder").addClass('hide');
+                } else {
+                    $("#ar_holder").removeClass('hide');
+
+                    if ($("#id").val() == '' && !manualPrice && $("#tipus").val() != '') {
+                        if ($("#tipus").val())
+                        var data = {
+                            'tipus' : $("#tipus").val(),
+                            'ceg' : $("#ceg").val(),
+                            'szolgaltatas' : $("#szolgaltatas").val(),
+                            'viasz' : $("#viasz").is(':checked') ? 1 : 0,
+							'sma' : $("#sma").is(':checked') ? 1 : 0,
+							'smac' : $("#smac").is(':checked') ? 1 : 0,
+							'ss' : $("#ss").is(':checked') ? 1 : 0,
+                        };
+
+                        $.get($("#aktivitas_getar").html(), data, function(ar) {
+                            $("#ar").val(ar);
+                        });
+                    }
+                }
+
+                if ($(this).val() == '0') {
+                    $("#nev_holder").removeClass('hide');
+                } else {
+                    $("#nev").val('');
+                    $("#nev_holder").addClass('hide');
+                }
+            });
+
+            $("#kellek_megkezdve").click(function(){
+                if ($(this).is(':checked')) {
+                    $("#kellekek_holder").removeClass('hide');
+                } else {
+                    $("#kellekek_holder").addClass('hide');
+                    $("[id^='kellekek_'").each(function(){
+                        $(this).prop('checked', false);
+                    });
+                }
+            });
+            
+            function setFizetveCheckbox()
+            {
+                if (!manualFizetve && $("#id").val() == '') {
+                    if ($("#ceg").val() == '')
+                        $("#status").prop('checked', true);
+                    else {
+                        var data = {
+                            'ceg' : $("#ceg").val(),
+                        };
+
+                        $.get($("#aktivitas_getfizetesihatarido").html(), data, function(hatarido) {
+                            if (hatarido == '0')
+                                $("#status").prop('checked', true);
+                            else
+                                $("#status").prop('checked', false);
+                        });
+                    }
+                }            
+            }            
+        });        
+    </script>
+    <?php
+} else {
+    ?>
+    <div class="error-text"><?php echo $this->translate('Ezt az aktivitást már nem módosíthatod!'); ?></div>
+    <?php
+}
+?>

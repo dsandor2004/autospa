@@ -1,0 +1,105 @@
+<?php
+$now = new \DateTime();
+
+if ($now->format('d') <= 15) {
+    $aktualisFrom = $now->format('Y-m-01');
+    $aktualisTo = $now->format('Y-m-15');
+    
+    $from = \DateTime::createFromFormat('Y-m-d', $now->format('Y-m-16'));
+    $from->sub(new \DateInterval("P1M"));
+
+    $to = \DateTime::createFromFormat('Y-m-d', $now->format('Y-m-t'));
+    $to->sub(new \DateInterval("P1M"));
+    
+    $from4 = \DateTime::createFromFormat('Y-m-d', $now->format('Y-m-01'));
+    $from4->sub(new \DateInterval("P1M"));
+    
+    $to4 = \DateTime::createFromFormat('Y-m-d', $now->format('Y-m-15'));
+    $to4->sub(new \DateInterval("P1M"));
+    
+} else {
+    $aktualisFrom = $now->format('Y-m-16');
+    $aktualisTo = $now->format('Y-m-t');
+    
+    $from = \DateTime::createFromFormat('Y-m-d', $now->format('Y-m-01'));
+    $to = \DateTime::createFromFormat('Y-m-d', $now->format('Y-m-15'));
+    
+    $from4 = \DateTime::createFromFormat('Y-m-d', $now->format('Y-m-16'));
+    $from4->sub(new \DateInterval("P1M"));
+    
+    $to4 = \DateTime::createFromFormat('Y-m-d', $now->format('Y-m-t'));
+    $to4->sub(new \DateInterval("P1M"));    
+}
+?>
+<input type="hidden" id="aktualis_from"  value="<?php echo $aktualisFrom ?>"/>
+<input type="hidden" id="aktualis_to"  value="<?php echo $aktualisTo ?>"/>
+
+<input type="hidden" id="elozo_from"  value="<?php echo $from->format('Y-m-d') ?>"/>
+<input type="hidden" id="elozo_to"  value="<?php echo $to->format('Y-m-d') ?>"/>
+
+<input type="hidden" id="elozo4_from"  value="<?php echo $from4->format('Y-m-d') ?>"/>
+<input type="hidden" id="elozo4_to"  value="<?php echo $to4->format('Y-m-d') ?>"/>
+
+<a href="javascript:void(0)" class="btn btn-info" id="teljesitmeny_aktualis"><?php echo $this->translate('Aktuális 2 hét') ?></a>
+<a href="javascript:void(0)" class="btn btn-info" id="teljesitmeny_elozo"><?php echo $this->translate('Előző 2 hét') ?></a>
+<a href="javascript:void(0)" class="btn btn-info" id="teljesitmeny4_elozo"><?php echo $from4->format('Y.m.d') . ' - ' . $to4->format('Y.m.d') ?></a>
+<br /><br />
+
+<form class="form-inline" role="form" id="teljesitmeny_interval_selector">
+  <div class="form-group">
+    <label class="sr-only" for="from"></label>
+    <input type="date" class="form-control" id="teljesitmeny_from" name="teljesitmeny_from" value="<?php echo $from->format('Y-m-d'); ?>" />
+  </div>
+  -
+  <div class="form-group">
+    <label class="sr-only" for="to"></label>
+    <input type="date" class="form-control" id="teljesitmeny_to" name="teljesitmeny_to" value="<?php echo $to->format('Y-m-d'); ?>" />
+  </div>
+  <a href="javascript:void(0)" id="teljesitmeny_submit" class="btn btn-info"><?php echo $this->translate('Keresés') ?></a>
+</form>
+<br />
+
+<div><b><span id="teljesitmeny_holder"><!-- Remote content --></span></b></div>
+<br /><br />
+<script>
+    $(document).ready(function() {
+        $("#teljesitmeny_submit").click(function() {
+            getTeljesitmeny($("#teljesitmeny_from").val(), $("#teljesitmeny_to").val());
+        });
+
+        $("#teljesitmeny_submit").trigger('click');
+        
+        $("#teljesitmeny_aktualis").click(function() {
+            $("#teljesitmeny_from").val($("#aktualis_from").val());
+            $("#teljesitmeny_to").val($("#aktualis_to").val());
+            $("#teljesitmeny_submit").trigger('click');
+        });
+        
+        $("#teljesitmeny_elozo").click(function() {
+            $("#teljesitmeny_from").val($("#elozo_from").val());
+            $("#teljesitmeny_to").val($("#elozo_to").val());
+            $("#teljesitmeny_submit").trigger('click');
+        });
+
+        $("#teljesitmeny4_elozo").click(function() {
+            $("#teljesitmeny_from").val($("#elozo4_from").val());
+            $("#teljesitmeny_to").val($("#elozo4_to").val());
+            $("#teljesitmeny_submit").trigger('click');
+        });
+
+        function getTeljesitmeny(from, to)
+        {
+            $("#teljesitmeny_holder").html(getAjaxLoader());
+            var data = {
+                'from' : from,
+                'to' : to,
+                'munkas_id' : $("#munkas_id").val(),
+            };
+
+            $.get($("#getteljesitmenyurl").html(), data, function(osszTeljesitmeny) {
+                $("#teljesitmeny_holder").html(osszTeljesitmeny + ' RON');
+                $("#teljesitmeny_holder").removeClass('hide');
+            });            
+        }
+    });
+</script>

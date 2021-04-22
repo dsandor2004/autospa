@@ -1,0 +1,487 @@
+<div class="hide" id="modal_title_new"><?php echo $this->translate('Új teendő'); ?></div>
+<div class="hide" id="modal_title_edit"><?php echo $this->translate('Teendők módosítása'); ?></div>
+<div class="hide" id="modal_getformurl"><?php echo $this->url('teendo', array('action' => 'getform')) ?></div>
+<div class="hide" id="modal_saveformurl"><?php echo $this->url('teendo', array('action' => 'saveform')) ?></div>
+<div class="hide" id="ajax_error_message"><?php echo $this->translate('Hiba! A műveletet nem sikerült végrehajtani!'); ?></div>
+<div class="hide" id="saveFormCallbackFuncName">saveTeendoCallback</div>
+
+<div class="hide" id="save_url"><?php echo $this->url('munkas', array('action' => 'savemuszak')) ?></div>
+<div class="hide" id="save_napi_url"><?php echo $this->url('munkas', array('action' => 'savenapimuszak')) ?></div>
+<div class="hide" id="getejjelimuszakurl"><?php echo $this->url('munkas', array('action' => 'getejjelimuszak')) ?></div>
+<div class="hide" id="getnapimuszakurl"><?php echo $this->url('munkas', array('action' => 'getnapimuszak')) ?></div>
+<div class="hide" id="save_habfelelos_url"><?php echo $this->url('munkas', array('action' => 'savehabfelelos')) ?></div>
+<div class="hide" id="save_reklamfelelos_url"><?php echo $this->url('munkas', array('action' => 'savereklamfelelos')) ?></div>
+<div class="hide" id="lezarteendo_url"><?php echo $this->url('teendo', array('action' => 'lezarteendo')) ?></div>
+
+<div><?php echo $this->translate('Mai dátum:') ?> <?php $date = new DateTime(); echo $date->format('Y-M-d') ?></div>
+
+<?php
+if ($login->hasRole(\SamUser\Entity\Role::ROLE_NAME_ADMIN) || $login->hasRole(\SamUser\Entity\Role::ROLE_NAME_UGYVEZETO)) {
+    ?>
+    <h1><?php echo $this->translate('Elvégzendő teendők') ?></h1>
+    
+    <a href="javascript:void(0)" class="create_edit" id="object_0">
+        <span class="glyphicon glyphicon-plus"></span> <?php echo $this->translate('Új teendő hozzáadása'); ?>
+    </a>
+    <br /><br />
+    
+    <?php $dataTableId = 'teendok_table' ?>
+    <table id="<?php echo $dataTableId ?>" class="table table-striped table-bordered myDataTable" width="100%">
+        <thead>
+            <tr>
+                <th><?php echo $this->translate('Felhasználó'); ?></th>
+                <th><?php echo $this->translate('Leírás'); ?></th>
+                <th><?php echo $this->translate('Elvégezve'); ?></th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
+            if (count($teendok)) {
+                foreach ($teendok as $teendo) {
+                    ?>
+                    <tr>
+                        <td><?php echo $this->escapeHtml($teendo->getUser()->getUsername()) ?></td>
+                        <td><?php echo $this->escapeHtml($teendo->getDescription()) ?></td>
+                        <td><input type="checkbox" id="lezar_teendo_<?php echo $teendo->getId() ?>" /></td>
+                    </tr>
+                    <?php
+                }
+            }
+            ?>
+        </tbody>
+    </table>
+    <br />
+    <?php
+}
+?>
+    
+<h1><?php echo $this->translate('Értesítések') ?></h1>
+<h4><?php echo $this->translate('Közelgő szülinapok') ?></h4>
+<?php
+if (count($szulinaposok)) :
+    ?>
+    <div class="text-danger">
+        <b>
+            <?php
+            foreach ($szulinaposok as $munkas) {
+                echo $munkas->getName() . ': ' . $munkas->getBirthdate()->format('M-d') . '<br />';
+            }
+            ?>
+        </b>
+    </div>
+    <?php
+else:
+    echo $this->translate('Egyik alkalmazottnak sem lesz szülinapja az elkövetkező 7 napban');
+endif;
+
+if (count($fizetesValtozasok)) :
+    ?>
+    <br /><br />
+    <h4><?php echo $this->translate('Fizetésváltozások') ?></h4>
+    <div class="text-danger">
+        <b>
+            <?php
+            foreach ($fizetesValtozasok as $munkasName) {
+                echo $munkasName . ' fizetése mától megnőtt!<br />';
+            }
+            ?>
+        </b>
+    </div>
+    <?php
+endif;
+?>
+    
+<br />
+<h1><?php echo $this->translate('Beállítások') ?></h1>
+<div class="warning_div <?php if ($habfelelos_fiko) echo 'hide'; ?>" id="hab_warning_fiko">
+    <span class="glyphicon glyphicon-exclamation-sign"></span>
+    <?php echo $this->translate('Nincs habfelelős beállítva (Fikó)') ?>
+</div>
+
+<div class="warning_div <?php if ($habfelelos_koronka) echo 'hide'; ?>" id="hab_warning_koronka">
+    <span class="glyphicon glyphicon-exclamation-sign"></span>
+    <?php echo $this->translate('Nincs habfelelős beállítva (Koronka)') ?>
+</div>
+
+<div class="warning_div <?php if ($reklamfelelos) echo 'hide'; ?>" id="reklam_warning">
+    <span class="glyphicon glyphicon-exclamation-sign"></span>
+    <?php echo $this->translate('Nincs reklámfelelős beállítva') ?>
+</div>
+
+<br />
+
+<form class="form-inline <?php if ($habfelelos_fiko) echo 'hide'; ?>" role="form" id="havi_habfelelos_form_fiko">
+    <div class="form-group">
+        <?php echo $this->translate('Havi habfelelős Fikó:') ?>
+        <select class="form-control habfelelos">
+            <option value=""><?php echo $this->translate('--Válassz--') ?></option>
+            <?php
+            foreach ($munkasokFiko as $munkas) {
+                ?>
+                <option value="<?php echo $munkas->getId() ?>" <?php if ($habfelelos_fiko && $habfelelos_fiko->getMunkas()->getId() == $munkas->getId()) echo 'selected="selected"' ?>><?php echo $munkas->getName() ?></option>
+                <?php
+            }
+            ?>
+        </select>
+    </div>
+    <a href="javascript:void(0)" class="habfelelos_submit btn btn-info"><?php echo $this->translate('Mentés') ?></a>
+    <span class="error-text hide ures_habfelelos"><?php echo $this->translate('Válassz ki egy habfelelőst!') ?></span>
+</form>
+
+<div id="habfelelos_holder_fiko" class="<?php if (!$habfelelos_fiko) echo 'hide'; ?>">
+    <?php echo $this->translate('Havi habfelelős Fikó:') ?> <span id="habfelelos_name_fiko"><?php echo $habfelelos_fiko ? $habfelelos_fiko->getMunkas()->getName() : '' ?></span>
+    <a href="javascript:void(0)" id="edit_habfelelos_fiko">
+        <span class="glyphicon glyphicon-pencil"></span>
+        <?php echo $this->translate('Módosítás') ?>
+    </a>    
+</div>
+<br />
+
+<form class="form-inline <?php if ($habfelelos_koronka) echo 'hide'; ?>" role="form" id="havi_habfelelos_form_koronka">
+    <div class="form-group">
+        <?php echo $this->translate('Havi habfelelős Koronka:') ?>
+        <select class="form-control habfelelos">
+            <option value=""><?php echo $this->translate('--Válassz--') ?></option>
+            <?php
+            foreach ($munkasokKoronka as $munkas) {
+                ?>
+                <option value="<?php echo $munkas->getId() ?>" <?php if ($habfelelos_koronka && $habfelelos_koronka->getMunkas()->getId() == $munkas->getId()) echo 'selected="selected"' ?>><?php echo $munkas->getName() ?></option>
+                <?php
+            }
+            ?>
+        </select>
+    </div>
+    <a href="javascript:void(0)" class="habfelelos_submit btn btn-info"><?php echo $this->translate('Mentés') ?></a>
+    <span class="error-text hide ures_habfelelos"><?php echo $this->translate('Válassz ki egy habfelelőst!') ?></span>
+</form>
+
+<div id="habfelelos_holder_koronka" class="<?php if (!$habfelelos_koronka) echo 'hide'; ?>">
+    <?php echo $this->translate('Havi habfelelős Koronka:') ?>  <span id="habfelelos_name_koronka"><?php echo $habfelelos_koronka ? $habfelelos_koronka->getMunkas()->getName() : '' ?></span>
+    <a href="javascript:void(0)" id="edit_habfelelos_koronka">
+        <span class="glyphicon glyphicon-pencil"></span>
+        <?php echo $this->translate('Módosítás') ?>
+    </a>    
+</div>
+<br />
+<form class="form-inline <?php if ($reklamfelelos) echo 'hide'; ?>" role="form" id="havi_reklamfelelos_form">
+    <div class="form-group">
+        <?php echo $this->translate('Havi reklámfelelős:') ?>
+        <select class="form-control reklamfelelos">
+            <option value=""><?php echo $this->translate('--Válassz--') ?></option>
+            <?php
+            foreach ($munkasokFiko as $munkas) {
+                ?>
+                <option value="<?php echo $munkas->getId() ?>" <?php if ($reklamfelelos && $reklamfelelos->getMunkas()->getId() == $munkas->getId()) echo 'selected="selected"' ?>><?php echo $munkas->getName() ?></option>
+                <?php
+            }
+            foreach ($munkasokKoronka as $munkas) {
+                ?>
+                <option value="<?php echo $munkas->getId() ?>" <?php if ($reklamfelelos && $reklamfelelos->getMunkas()->getId() == $munkas->getId()) echo 'selected="selected"' ?>><?php echo $munkas->getName() ?></option>
+                <?php
+            }
+            ?>
+        </select>
+    </div>
+    <a href="javascript:void(0)" class="reklamfelelos_submit btn btn-info"><?php echo $this->translate('Mentés') ?></a>
+    <span class="error-text hide ures_reklamfelelos"><?php echo $this->translate('Válassz ki egy reklámfelelőst!') ?></span>
+</form>
+
+<div id="reklamfelelos_holder" class="<?php if (!$reklamfelelos) echo 'hide'; ?>">
+    <?php echo $this->translate('Havi reklámfelelős:') ?> <span id="reklamfelelos_name"><?php echo $reklamfelelos ? $reklamfelelos->getMunkas()->getName() : '' ?></span>
+    <a href="javascript:void(0)" id="edit_reklamfelelos">
+        <span class="glyphicon glyphicon-pencil"></span>
+        <?php echo $this->translate('Módosítás') ?>
+    </a>    
+</div>
+<br />
+
+<h4><?php echo $this->translate('Éjjeli műszak:') ?></h4>
+<form class="form-inline" role="form" id="interval_selector">
+  <div class="form-group">
+    <label class="sr-only" for="from"></label>
+    <input type="date" class="form-control" id="datum" name="datum" value="<?php echo $date->format('Y-m-d'); ?>" />
+  </div>
+  <a href="javascript:void(0)" id="datum_submit" class="btn btn-info"><?php echo $this->translate('Keresés') ?></a>
+</form>
+<br />
+
+<div id="ejjelimuszak_holder">
+    <!-- Remote content -->
+</div>
+<br />
+
+<h4><?php echo $this->translate('Ma ők dolgoznak:') ?></h4>
+<form class="form-inline" role="form" id="interval_selector_napimuszak">
+  <div class="form-group">
+    <label class="sr-only" for="from"></label>
+    <input type="date" class="form-control" id="napimuszak_datum" name="datum" value="<?php echo $date->format('Y-m-d'); ?>" />
+  </div>
+  <a href="javascript:void(0)" id="datum_submit_napimuszak" class="btn btn-info"><?php echo $this->translate('Keresés') ?></a>
+</form>
+<br />
+
+<div id="napimuszak_holder">
+    <!-- Remote content -->
+</div>
+<?php echo $this->partial('/application/partial_modal.phtml'); ?>
+<script>
+    $(document).ready(function() {
+        
+        $("#<?php echo $dataTableId ?>").dataTable({
+            language: {
+                url: '/js/DataTables-1.10.2/localization/Hungarian.json'
+            },
+            "columnDefs": [                
+                { "orderable": false, "targets": 2 }
+            ]            
+        });        
+        
+        $("[id^='lezar_teendo_']").click(function() {
+            var $this = $(this); 
+            var id = $(this).attr('id').replace('lezar_teendo_', '');
+            var url = $("#lezarteendo_url").html();
+            $.post(url, {'id' : id}, function(resp){
+                if (resp == 'success') {
+                    var oTable = $(".myDataTable").DataTable();
+                    oTable.row($this.closest('tr')).remove();
+                    oTable.draw();
+                    $.sticky($("#modal_success").html(), {classList: 'success', autoclose: 4000,  position: 'top-right'});
+                } else {
+                    $.sticky($("#ajax_error_message").html(), {classList: 'error', autoclose: 4000,  position: 'top-right'});
+                }
+            });
+        });
+        
+        function muszakHolderRow(id)
+        {
+            $("#mai_muszak_holder").append('<div id="mai_muszak_munkas_' +id + '">' + $("#mai_muszakmunkas_nev_"+id).text()+ ' - ' + $("#muszakmunkas_hely_" + id + " option:selected").text() + '</div>');
+        }
+        
+        function decreaseWarningCounter()
+        {
+            if ($("#warning_count").html() - 1 == 0)
+                $("#warning_count").remove();
+            else
+                $("#warning_count").html($("#warning_count").html() - 1);
+        }
+        
+        $("#datum_submit").click(function(){
+            $("#ejjelimuszak_holder").html(getAjaxLoader());
+            var data = {
+                'datum' : $("#datum").val(),
+            };
+
+            $.get($("#getejjelimuszakurl").html(), data, function(html) {
+                $("#ejjelimuszak_holder").html(html);
+            });
+        });
+        
+        $("#datum_submit").trigger('click');
+
+        $("body").on("click" , "[id^='muszakmunkas_']", function(){
+
+            var id = $(this).attr('id').replace('muszakmunkas_', '');
+
+            if ($(this).is(':checked')) {
+                $("#muszak_holder").append('<div id="muszak_munkas_' +id + '">' + $("#muszakmunkas_nev_"+id).text()+'</div>');
+            } else {
+                $("#muszak_munkas_"+id).remove();
+            }
+        });
+        
+        $("body").on("click" , "#ejjeli_mentes", function(){
+            $("#ures_ejjeli").addClass('hide');
+            
+            var url = $("#save_url").html();
+            
+            var data = {
+                'datum' : $("#datum").val(),
+                'muszakmunkas[]' : [],
+            };
+            
+            $("[id^='muszakmunkas_']").each(function() {
+                if ($(this).is(':checked')) {
+                    data['muszakmunkas[]'].push($(this).val());
+                }
+            });
+            
+            if (data['muszakmunkas[]'].length == 0) {
+                $("#ures_ejjeli").removeClass('hide');
+                return false;
+            }
+            
+            $.post(url, data, function() {
+                $("#ejjelimuszak_form").addClass('hide');
+                $("#muszak_holder").removeClass('hide');
+                
+                if ($("#ejjelimuszak_warning").hasClass('hide') == false) {
+                    $("#ejjelimuszak_warning").addClass('hide');
+                    decreaseWarningCounter();
+                }
+            });
+            
+        });
+        
+        $("body").on("click" , "#edit_muszak", function(){
+            $("#ejjelimuszak_form").removeClass('hide');
+            $("#muszak_holder").addClass('hide');
+        });
+
+        $("#datum_submit_napimuszak").click(function(){
+            $("#napimuszak_holder").html(getAjaxLoader());
+            var data = {
+                'datum' : $("#napimuszak_datum").val(),
+            };
+
+            $.get($("#getnapimuszakurl").html(), data, function(html) {
+                $("#napimuszak_holder").html(html);
+            });
+        });
+        
+        $("#datum_submit_napimuszak").trigger('click');
+
+
+        $("body").on("change" , "#napi_baros", function(){
+            var oldId = $("#napi_baros_val").val();
+            
+            if (oldId)
+                $("#mai_muszak_munkas_"+oldId).remove();
+            
+            $("#napi_baros_val").val($(this).val());
+            if ($(this).val())
+                $("#mai_muszak_holder").append('<div id="mai_muszak_munkas_' + $(this).val() + '">' + $("#napi_baros option:selected").text()+'</div>');            
+        });
+
+        $("body").on("click" , "[id^='napi_muszakmunkas_']", function(){
+
+            var id = $(this).attr('id').replace('napi_muszakmunkas_', '');
+
+            if ($(this).is(':checked')) {
+                muszakHolderRow(id);
+            } else {
+                $("#mai_muszak_munkas_"+id).remove();
+            }
+        });
+        
+        $("body").on("change" , "[id^='muszakmunkas_hely_']", function(){
+            var id = $(this).attr('id').replace('muszakmunkas_hely_', '');
+            if ($("#napi_muszakmunkas_" + id).is(':checked')) {
+                $("#mai_muszak_munkas_"+id).remove();
+                muszakHolderRow(id);
+            }
+        });
+            
+        $("body").on("click" , "#napi_mentes", function(){
+            $("#ures_napi").addClass('hide');
+            $("#ures_baros").addClass('hide');
+            
+            var url = $("#save_napi_url").html();
+            
+            var data = {
+                'datum' : $("#napimuszak_datum").val(),
+                'napi_muszakmunkas[]' : []
+            };
+            
+            $("[id^='napi_muszakmunkas_']").each(function() {
+                var $this = $(this);
+                if ($(this).is(':checked')) {
+                    data['napi_muszakmunkas[]'].push($(this).val());
+                    
+                    var id = $this.attr('id').replace('napi_muszakmunkas_', '');
+                    data['muszakmunkas_hely_' + id] = $("#muszakmunkas_hely_" + id).val();
+                }
+            });
+            
+            if ($("#napi_baros").val() == '') {
+                $("#ures_baros").removeClass('hide');
+                return false;
+            }
+            
+            data.napi_baros = $("#napi_baros").val();
+            
+            if (data['napi_muszakmunkas[]'].length == 0) {
+                $("#ures_napi").removeClass('hide');
+                return false;
+            }
+            
+            $.post(url, data, function() {
+                $("#napimuszak_form").addClass('hide');
+                $("#mai_muszak_holder").removeClass('hide');
+                
+                if ($("#napimuszak_warning").hasClass('hide') == false) {
+                    $("#napimuszak_warning").addClass('hide');
+                    decreaseWarningCounter();
+                }
+            });
+            
+        });
+        
+        $("body").on("click" , "#edit_napi_muszak", function(){
+            $("#napimuszak_form").removeClass('hide');
+            $("#mai_muszak_holder").addClass('hide');
+        });
+
+        $(".habfelelos_submit").click(function(){
+
+            var $form = $(this).closest('form');
+            var mosoda = $form.attr('id').replace('havi_habfelelos_form_','');
+
+            $form.find(".ures_habfelelos").addClass('hide');
+            
+            var url = $("#save_habfelelos_url").html();
+            
+            if ($form.find('.habfelelos').val() == '') {
+                $form.find(".ures_habfelelos").removeClass('hide');
+                return false;
+            }
+            $.post(url, {'habfelelos' : $form.find('.habfelelos').val()}, function() {
+                $form.addClass('hide');
+                $("#habfelelos_name_" + mosoda).html($form.find('.habfelelos').find('option:selected').text());
+                $("#habfelelos_holder_" + mosoda).removeClass('hide');
+                
+                if ($("#hab_warning_" + mosoda).hasClass('hide') == false) {
+                    $("#hab_warning_" + mosoda).addClass('hide');
+                    decreaseWarningCounter();
+                }
+            });
+            
+        });
+
+        $("[id^='edit_habfelelos_']").click(function(){
+            var mosoda = $(this).attr('id').replace('edit_habfelelos_', '');
+            $("#havi_habfelelos_form_" + mosoda).removeClass('hide');
+            $("#habfelelos_holder_" + mosoda).addClass('hide');
+        });
+
+        $(".reklamfelelos_submit").click(function(){
+
+            var $form = $(this).closest('form');
+
+            $form.find(".ures_reklamfelelos").addClass('hide');
+            
+            var url = $("#save_reklamfelelos_url").html();
+            
+            if ($form.find('.reklamfelelos').val() == '') {
+                $form.find(".ures_reklamfelelos").removeClass('hide');
+                return false;
+            }
+            $.post(url, {'reklamfelelos' : $form.find('.reklamfelelos').val()}, function() {
+                $form.addClass('hide');
+                $("#reklamfelelos_name").html($form.find('.reklamfelelos').find('option:selected').text());
+                $("#reklamfelelos_holder").removeClass('hide');
+                
+                if ($("#reklam_warning").hasClass('hide') == false) {
+                    $("#reklam_warning").addClass('hide');
+                    decreaseWarningCounter();
+                }
+            });
+            
+        });
+
+        $("#edit_reklamfelelos").click(function(){
+            $("#havi_reklamfelelos_form").removeClass('hide');
+            $("#reklamfelelos_holder" ).addClass('hide');
+        });
+
+    });
+</script>

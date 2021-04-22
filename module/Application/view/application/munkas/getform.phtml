@@ -1,0 +1,62 @@
+<?php
+$form->prepare();
+echo $this->form()->openTag($form);
+?>
+<?php echo $this->formRow($form->get('id')); ?>
+
+<div class="form-group">
+    <?php echo $this->formRow($form->get('hely')); ?>
+    <span class="help-block" id="help_<?php echo $form->get('hely')->getAttribute('id') ?>"></span>
+</div>
+
+<div class="form-group">
+    <?php echo $this->formRow($form->get('munkastipus')); ?>
+    <span class="help-block" id="help_<?php echo $form->get('munkastipus')->getAttribute('id') ?>"></span>
+</div>
+
+<div class="form-group">
+    <?php echo $this->formRow($form->get('name')); ?>
+    <span class="help-block" id="help_<?php echo $form->get('name')->getAttribute('id') ?>"></span>
+</div>
+
+<div class="form-group">
+    <?php echo $this->formRow($form->get('hiredate')); ?>
+    <span class="help-block" id="help_<?php echo $form->get('hiredate')->getAttribute('id') ?>"></span>
+</div>
+
+<div class="form-group">
+    <?php echo $this->formRow($form->get('birthdate')); ?>
+    <span class="help-block" id="help_<?php echo $form->get('birthdate')->getAttribute('id') ?>"></span>
+</div>
+
+<div class="form-group">
+    <?php echo $this->formCheckbox($form->get('add_fizetes')) ?>
+    <label for="add_fizetes"><?php echo $form->get('add_fizetes')->getLabel() ?></label>
+    <br />
+
+    <?php
+    if ($form->get('add_fizetes')->getValue() == 0) :
+        $fizetesHide = 'hide';
+    endif;
+    ?>
+</div>
+
+<div class="form-group <?php echo $fizetesHide ?>" id="fizetes_holder">
+    <?php echo $this->formRow($form->get('fizetes')); ?>
+    <span class="help-block" id="help_<?php echo $form->get('fizetes')->getAttribute('id') ?>"></span>
+</div>
+
+<?php echo $this->form()->closeTag($form); ?>
+
+<script>
+    $(document).ready(function() {    
+        $("#add_fizetes").click(function(){
+            if ($(this).is(':checked')) {
+                $("#fizetes_holder").removeClass('hide');
+            } else {
+                $("#fizetes_holder").addClass('hide');
+                $("#fizetes").val('');
+            }
+        });
+    });
+</script>

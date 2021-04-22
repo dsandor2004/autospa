@@ -1,0 +1,38 @@
+<?php
+
+namespace Application\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * AktivitasMunkas
+ *
+ * @ORM\Table(name="aktivitas_munkas", indexes={@ORM\Index(name="aktivitas_id", columns={"aktivitas_id", "munkas_id"}), @ORM\Index(name="munkas_id", columns={"munkas_id"})})
+ * @ORM\Entity
+ */
+class AktivitasMunkas
+{
+    /**
+     * @var \Application\Entity\Aktivitas
+     *
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="NONE")
+     * @ORM\OneToOne(targetEntity="Application\Entity\Aktivitas")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="aktivitas_id", referencedColumnName="id")
+     * })
+     */
+    private $aktivitas;
+
+    /**
+     * @var \Application\Entity\Munkas
+     *
+     * @ORM\ManyToOne(targetEntity="Application\Entity\Munkas")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="munkas_id", referencedColumnName="id")
+     * })
+     */
+    private $munkas;
+
+
+}

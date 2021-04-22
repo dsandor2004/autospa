@@ -1,0 +1,53 @@
+<?php
+
+namespace Application\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * Fizeteskategoria
+ *
+ * @ORM\Table(name="fizeteskategoria")
+ * @ORM\Entity
+ */
+class Fizeteskategoria
+{
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="id", type="integer", nullable=false)
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="IDENTITY")
+     */
+    private $id;
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="minregiseg_ho", type="smallint", nullable=false)
+     */
+    private $minregisegHo;
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="maxregiseg_ho", type="smallint", nullable=true)
+     */
+    private $maxregisegHo;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="fizetes", type="decimal", precision=10, scale=2, nullable=false)
+     */
+    private $fizetes;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="szazalek", type="decimal", precision=10, scale=2, nullable=false)
+     */
+    private $szazalek;
+
+
+}

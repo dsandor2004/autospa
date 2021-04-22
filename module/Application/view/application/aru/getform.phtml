@@ -1,0 +1,27 @@
+<?php
+$form->prepare();
+echo $this->form()->openTag($form);
+?>
+<?php echo $this->formRow($form->get('id')); ?>
+
+<div class="form-group">
+    <?php echo $this->formRow($form->get('nev')); ?>
+    <span class="help-block" id="help_<?php echo $form->get('nev')->getAttribute('id') ?>"></span>
+</div>
+
+<div class="form-group">
+    <?php echo $this->formRow($form->get('vetelar')); ?>
+    <span class="help-block" id="help_<?php echo $form->get('vetelar')->getAttribute('id') ?>"></span>
+</div>
+
+<div class="form-group">
+    <?php echo $this->formRow($form->get('eladasiar')); ?>
+    <span class="help-block" id="help_<?php echo $form->get('eladasiar')->getAttribute('id') ?>"></span>
+</div>
+
+<div class="form-group">
+    <?php echo $this->formRow($form->get('darab')); ?>
+    <span class="help-block" id="help_<?php echo $form->get('darab')->getAttribute('id') ?>"></span>
+</div>
+
+<?php echo $this->form()->closeTag($form); ?>

@@ -1,0 +1,46 @@
+<?php
+
+namespace Application\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * Munkas
+ *
+ * @ORM\Table(name="munkas", uniqueConstraints={@ORM\UniqueConstraint(name="UNIQ_1E0B0C095E237E06", columns={"name"})})
+ * @ORM\Entity
+ */
+class Munkas
+{
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="id", type="integer", nullable=false)
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="IDENTITY")
+     */
+    private $id;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="name", type="string", length=255, nullable=true)
+     */
+    private $name;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="hiredate", type="date", nullable=false)
+     */
+    private $hiredate;
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="status", type="smallint", nullable=false)
+     */
+    private $status;
+
+
+}

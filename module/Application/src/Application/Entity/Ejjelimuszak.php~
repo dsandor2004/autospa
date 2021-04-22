@@ -1,0 +1,42 @@
+<?php
+
+namespace Application\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * Ejjelimuszak
+ *
+ * @ORM\Table(name="ejjelimuszak", indexes={@ORM\Index(name="IDX_33368CA252F76825", columns={"munkas_id"})})
+ * @ORM\Entity
+ */
+class Ejjelimuszak
+{
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="id", type="integer", nullable=false)
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="IDENTITY")
+     */
+    private $id;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="datum", type="date", nullable=false)
+     */
+    private $datum;
+
+    /**
+     * @var \Application\Entity\Munkas
+     *
+     * @ORM\ManyToOne(targetEntity="Application\Entity\Munkas")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="munkas_id", referencedColumnName="id")
+     * })
+     */
+    private $munkas;
+
+
+}

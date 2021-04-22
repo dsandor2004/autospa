@@ -1,0 +1,46 @@
+<?php
+
+namespace Application\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * Szolgaltatas
+ *
+ * @ORM\Table(name="szolgaltatas", uniqueConstraints={@ORM\UniqueConstraint(name="UNIQ_4F34FF061CE474D3", columns={"nev"})})
+ * @ORM\Entity
+ */
+class Szolgaltatas
+{
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="id", type="integer", nullable=false)
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="IDENTITY")
+     */
+    private $id;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="nev", type="string", length=255, nullable=true)
+     */
+    private $nev;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="alapar", type="decimal", precision=10, scale=2, nullable=false)
+     */
+    private $alapar;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="cegesar", type="decimal", precision=10, scale=2, nullable=true)
+     */
+    private $cegesar;
+
+
+}

@@ -1,0 +1,267 @@
+<div class="hide" id="torol_confirm_text"><?php echo $this->translate('Biztosan törlöd a rendszámot?'); ?></div>
+<div class="hide" id="create_rendszam_url"><?php echo $this->url('ceg', array('action' => 'saverendszam')) ?></div>
+<div class="hide" id="save_special_url"><?php echo $this->url('ceg', array('action' => 'savespecial')) ?></div>
+<div class="hide" id="delete_url"><?php echo $this->url('ceg', array('action' => 'deleterendszam')) ?></div>
+<div class="hide" id="delete_success"><?php echo $this->translate('A rendszám sikeresen törölve!'); ?></div>
+<div class="hide" id="delete_error"><?php echo $this->translate('A rendszám törlése sikertelen!'); ?></div>
+<div class="hide" id="special_success"><?php echo $this->translate('A speciális árak sikeresen mentve!'); ?></div>
+
+<input type="hidden" id="isAllowedEdit" value="<?php echo ($this->isAllowed('ceg', 'modosit') ? 1 : 0); ?>" />
+
+<a href="<?php echo $this->url('ceg') ?>">
+    <span class="glyphicon glyphicon-arrow-left"></span>
+    <?php echo $this->translate('Vissza a cégek listájához') ?>
+</a>
+<br />
+
+<h3><?php echo $this->escapeHtml($ceg->getCegname()) ?></h3>
+<hr>
+
+<h4><?php echo $this->translate('Rendszámok:') ?></h4>
+<div id="rendszamok_holder">
+    <?php
+    if (count($rendszamok)) {
+        foreach ($rendszamok as $rendszam) {
+            ?>
+            <div>
+                <?php echo $this->escapeHtml($rendszam->getRendszam()) ?>
+                <?php
+                if ($this->isAllowed('ceg', 'modosit')) :
+                    ?>
+
+                    <a href="javascript:void(0)" id="delete_rendszam_<?php echo $rendszam->getId() ?>">
+                        <span class="glyphicon glyphicon-remove"></span>
+                    </a>
+                    <?php
+                endif;
+                ?>
+            </div>
+            <?php
+        }
+    }
+    ?>
+</div>
+<br />
+
+<?php
+if ($this->isAllowed('ceg', 'modosit')) :
+    ?>
+    <div>
+        <form class="form-inline">
+            <div class="form-group">
+                <label for="rendszam" class="sr-only"></label>
+                <input type="text" class="form-control" id="rendszam" name="rendszam" />
+            </div>
+            <a href="javascript:void(0)" class="btn btn-info" id="add_rendszam"><?php echo $this->translate('Új rendszám hozzáadása') ?></a>
+        </form>
+    </div>
+
+    <br />
+    <?php
+endif;
+?>
+
+<h4><?php echo $this->translate('Speciális árak:') ?></h4>
+
+<?php
+if ($this->isAllowed('ceg', 'modosit')) :
+    ?>
+    <div id="empty_special" class="<?php echo array_sum($spec_arak) ? 'hide' : '' ?>">
+        <a href="javascript:void(0)" class="open_special_edit">
+            <span class="glyphicon glyphicon-plus"></span> <?php echo $this->translate('Speciális árak létrehozása'); ?>
+        </a>
+    </div>
+    <?php
+endif;
+?>
+
+
+<div id="special_holder" class="<?php echo !array_sum($spec_arak) ? 'hide' : '' ?>">
+    <?php
+    if ($this->isAllowed('ceg', 'modosit')) :
+        ?>
+        <a href="javascript:void(0)" class=" open_special_edit">
+            <span class="glyphicon glyphicon-pencil"></span> <?php echo $this->translate('Speciális árak módosítása'); ?>
+        </a>
+        <?php
+    endif;
+    ?>
+        
+    <table class="table table-striped table-bordered myDataTable" width="100%">
+        <thead>
+            <tr>
+                <th><?php echo $this->translate('Szolgáltatás neve'); ?></th>
+                <th><?php echo $this->translate('Speciális ár'); ?></th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
+            foreach ($szolgaltatasok as $szolgaltatas) {
+                ?>
+                <tr id="specar_row_<?php echo $szolgaltatas->getId() ?>" class="<?php echo !$spec_arak[$szolgaltatas->getId()] ? 'hide' : '' ?>">
+                    <td><?php echo $szolgaltatas->getNev(); ?></td>
+                    <td><span id="spec_ar_value_<?php echo $szolgaltatas->getId() ?>"><?php echo $spec_arak[$szolgaltatas->getId()]; ?></span> RON</td>
+                </tr>
+                <?php
+            }
+            ?>
+        </tbody>
+    </table>
+</div>
+
+<div id="special_edit_holder" class="hide">
+    <form id="special_form">
+        <input type="hidden" name="ceg_id" value="<?php echo $ceg->getId() ?>" />
+        
+        <table class="table table-striped table-bordered" width="100%">
+            <thead>
+                <tr>
+                    <th>&nbsp;</th>
+                    <th><?php echo $this->translate('Szolgáltatás neve'); ?></th>
+                    <th><?php echo $this->translate('Speciális ár'); ?></th>
+                </tr>
+            </thead>     
+            <tbody>
+                <?php
+                foreach ($szolgaltatasok as $szolgaltatas) {
+                    ?>
+                    <tr>
+                        <td>
+                            <input name="special_chk[]" value="<?php echo $szolgaltatas->getId() ?>" type="checkbox" <?php echo $spec_arak[$szolgaltatas->getId()] ? 'checked="checked"' : '' ?> id="specialis_kivalasztva_<?php echo $szolgaltatas->getId() ?>" />
+                        </td>
+                        <td><?php echo $szolgaltatas->getNev() ?></td>
+                        <td>
+                            <div class="form-group">
+                                <label for="specialis_ar_<?php echo $szolgaltatas->getId() ?>" class="sr-only">&nbsp;</label>
+                                <input type="text" class="form-control <?php echo $spec_arak[$szolgaltatas->getId()] ? '' : 'hide' ?>" id="specialis_ar_<?php echo $szolgaltatas->getId() ?>" name="specialis_ar_<?php echo $szolgaltatas->getId() ?>" value="<?php echo $spec_arak[$szolgaltatas->getId()] ? $spec_arak[$szolgaltatas->getId()] : '' ?>" />
+                                <span class="help-block hide" id="help_specialis_ar_<?php echo $szolgaltatas->getId() ?>"><?php echo $this->translate('A mező értéke üres vagy helytelen!'); ?></span>
+                            </div>                            
+                        </td>                            
+                    </tr>
+                    <?php
+                }
+                ?>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3" align="right">
+                        <a href="javascript:void(0)" class="btn btn-info" id="save_special"><?php echo $this->translate('Mentés'); ?></a>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </form>
+</div>
+
+<script>
+    $(document).ready(function() {        
+        $("body").on('click', '[id^="delete_rendszam_"]', function() {
+            var row = $(this).closest('div');
+            if (confirm($("#torol_confirm_text").text())) {
+                var id = $(this).attr('id').replace('delete_rendszam_', '');
+                var url = $("#delete_url").html();
+                $.post(url, {'id' : id}, function(resp) {
+                    if (resp == 'success') {
+                        row.remove();
+                        $.sticky($("#delete_success").html(), {classList: 'success', autoclose: 4000,  position: 'top-right'});
+                    } else {
+                        $.sticky($("#delete_error").html(), {classList: 'error', autoclose: 4000,  position: 'top-right'});
+                    }
+                });
+
+            }
+        });
+        
+        $("#add_rendszam").click(function() {
+            var url = $("#create_rendszam_url").html();
+            $.post(url, {'rendszam' : $("#rendszam").val(), 'ceg_id' : '<?php echo $ceg->getId() ?>'}, function(respId) {
+
+                var rendszamRow = '<div>' + 
+                    $("#rendszam").val() +
+                    '<a href="javascript:void(0)" id="delete_rendszam_'+respId+'"> ' +
+                        '<span class="glyphicon glyphicon-remove"></span>' +
+                    '</a>' +
+                '</div>';
+
+                $("#rendszamok_holder").append(rendszamRow);
+                $("#rendszam").val('');
+            });
+        });
+        
+        $(".open_special_edit").click(function(){
+            $("#special_edit_holder").removeClass('hide');
+            $("#special_holder").addClass('hide');
+        });
+                
+        $("[id^='specialis_kivalasztva_']").click(function(){
+            removeErrorMarkers();
+            
+            var id = $(this).attr('id').replace('specialis_kivalasztva_', '');
+            
+            if ($(this).is(':checked'))
+                $("#specialis_ar_"+id).removeClass('hide');
+            else
+                $("#specialis_ar_"+id).addClass('hide');
+        });
+        
+        $("#save_special").click(function() {
+            
+            removeErrorMarkers();
+            
+            //check if form is valid
+            var hasErrors = false;
+            $("[id^='specialis_kivalasztva_']").each(function(){
+                var id = $(this).attr('id').replace('specialis_kivalasztva_', '');
+                var holder_div = $(this).closest('div');
+                
+                if ($(this).is(':checked')) {
+                    //allow only positive numbers with 2 decimal points
+                    var intRegex = /^\d+(?:\.\d\d?)?$/;
+                    
+                    if ($("#specialis_ar_"+id).val() == '' || !$("#specialis_ar_"+id).val().match(intRegex)) {
+                        $("#help_specialis_ar_"+id).removeClass('hide');
+                        $("#help_specialis_ar_"+id).closest('div').addClass('has-error');
+                        hasErrors = true;
+                    }
+                }
+            });
+            
+            if (!hasErrors) {
+                
+            var url = $("#save_special_url").html();
+                        
+            $.post(url, $("#special_form").serialize(), function() {
+                $.sticky($("#special_success").html(), {classList: 'success', autoclose: 4000,  position: 'top-right'});
+                $("[id^='specialis_kivalasztva_']").each(function(){
+                    var id = $(this).attr('id').replace('specialis_kivalasztva_', '');
+                    if ($(this).is(':checked')) {
+                        $("#specar_row_"+id).removeClass('hide');
+                        $("#spec_ar_value_"+id).html($("#specialis_ar_"+id).val());
+                    } else {
+                        $("#specar_row_"+id).addClass('hide');
+                    }
+                });
+                
+                $("#special_holder").removeClass('hide');
+                $("#special_edit_holder").addClass('hide');                
+            });
+                
+            } else
+                return false;
+            
+        });
+        
+        function removeErrorMarkers()
+        {
+            //remove previous error markers
+            $("form#special_form div.form-group").each(function(){
+                $(this).removeClass('has-error');
+            });
+            
+            $("[id^='help_specialis_ar_']").each(function(){
+                $(this).addClass('hide');
+            });            
+        }
+        
+    });
+</script>

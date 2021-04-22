@@ -1,0 +1,155 @@
+<h2><?php echo $this->translate('Bár') ?></h2>
+<hr />
+<div class="hide" id="modal_title_new"><?php echo $this->translate('Új árulás'); ?></div>
+<div class="hide" id="torol_confirm_text"><?php echo $this->translate('Biztosan törlöd az árulást?'); ?></div>
+<div class="hide" id="modal_title_edit"><?php echo $this->translate('Árulás módosítása'); ?></div>
+<div class="hide" id="modal_getformurl"><?php echo $this->url('bar', array('action' => 'getform')) ?></div>
+<div class="hide" id="modal_saveformurl"><?php echo $this->url('bar', array('action' => 'saveform')) ?></div>
+<div class="hide" id="delete_url"><?php echo $this->url('bar', array('action' => 'delete')) ?></div>
+<div class="hide" id="ajax_error_message"><?php echo $this->translate('Hiba! A műveletet nem sikerült végrehajtani!'); ?></div>
+<div class="hide" id="saveFormCallbackFuncName">saveArulasCallback</div>
+
+<input type="hidden" id="isAllowedEdit" value="<?php echo ($this->isAllowed('bar', 'modosit') ? 1 : 0); ?>" />
+<input type="hidden" id="isAllowedDelete" value="<?php echo ($this->isAllowed('bar', 'torol') ? 1 : 0); ?>" />
+
+<?php $dataTableId = 'arulas_table' ?>
+
+<?php
+$now = new \DateTime();
+?>
+<a href="javascript:void(0)" class="create_edit" id="object_0">
+	<span class="glyphicon glyphicon-plus"></span> <?php echo $this->translate('Új Árulás'); ?>
+</a>
+<br /><br />
+
+<a id="mai_nap" href="javascript:void(0)" class="btn btn-info"><?php echo $this->translate('Mai nap') ?></a>
+<br /><br />
+<form class="form-inline" role="form" id="interval_selector">
+  <div class="form-group">
+    <label class="sr-only" for="from"></label>
+    <input type="date" class="form-control" id="from" name="from" value="<?php echo $from; ?>" />
+  </div>
+  -
+  <div class="form-group">
+    <label class="sr-only" for="to"></label>
+    <input type="date" class="form-control" id="to" name="to" value="<?php echo $to; ?>" />
+  </div>
+  
+  <div class="form-group">
+    <label for="cash" class="sr-only">&nbsp;</label>
+    <select id="cash" name="cash" class="form-control">
+        <option value=""><?php echo $this->translate('Összes') ?></option>
+        <option <?php if ($cash == '1') echo 'selected="selected"' ?> value="1"><?php echo $this->translate('Cash') ?></option>
+    </select>      
+  </div>
+  
+  <button type="submit" class="btn btn-info"><?php echo $this->translate('Keresés') ?></button>
+</form>
+<br />
+
+<table id="<?php echo $dataTableId ?>" class="table table-striped table-bordered myDataTable" width="100%">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th><nobr><?php echo $this->translate('Áru'); ?></nobr></th>
+            <th><?php echo $this->translate('Ekezet nelkuli nev'); ?></th>
+			<th><?php echo $this->translate('Darab'); ?></th>
+            <th><?php echo $this->translate('Típus'); ?></th>
+			<th><?php echo $this->translate('Típus ekezetek nelkul'); ?></th>
+			<th><?php echo $this->translate('Megjegyzés'); ?></th>
+			<th><?php echo $this->translate('Megjegyzés ékezetek nelkul'); ?></th>
+			<th><?php echo $this->translate('Időpont'); ?></th>
+            <th><?php echo $this->translate('Műveletek'); ?></th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php
+        if (count($arulasok)) :
+            foreach ($arulasok as $arulas) {
+				if ($arulas->getKavefajta()) {
+					$nev = $arulas->getKavefajta()->getNev();
+					if($cukor[$arulas->getId()])
+						$nev .= " +" . $cukor[$arulas->getId()] . "cukor";
+					if($pohar[$arulas->getId()])
+						$nev .= " +1pohár";
+					if($poharfedo[$arulas->getId()])
+						$nev .= " +1pohárfedő";
+				} else
+					$nev = $arulas->getAru()->getNev();
+				?>
+                <tr>
+                    <td><?php echo $arulas->getId() ?></td>
+                    <td><?php echo $this->escapeHtml($nev) ?></td>
+                    <td><?php echo $this->accent_trimmer($nev) ?></td>
+                    <td><?php echo $this->escapeHtml($arulas->getAruDarab() * -1) ?></td>
+					<td><?php echo $this->escapeHtml($arulas->getTipusString()) ?></td>
+					<td><?php echo $this->accent_trimmer($this->escapeHtml($arulas->getTipus())) ?></td>
+					<td><?php echo $this->escapeHtml($arulas->getMegjegyzes()) ?></td>
+					<td><?php echo $this->accent_trimmer($this->escapeHtml($arulas->getMegjegyzes())) ?></td>
+					<td><?php echo $this->escapeHtml($arulas->getCreatedAt()->format('Y-m-d H:i:s')) ?></td>
+                    <td>
+                        <?php
+                        if ($this->isAllowed('bar', 'modosit') && (!$login->hasRole(\SamUser\Entity\Role::ROLE_NAME_BAROS) && !$login->hasRole(\SamUser\Entity\Role::ROLE_NAME_UGYVEZETO) || $arulas->isEditableAndDeletable())) :
+                                ?>
+                                <a href="javascript:void(0)" class="create_edit" id="object_<?php echo $arulas->getId() ?>" title="<?php echo $this->translate('Módosítás'); ?>">
+                                    <span class="glyphicon glyphicon-pencil"></span>
+                                </a>
+                                <?php
+                        endif;
+
+                        if ($this->isAllowed('bar', 'torol') && (!$login->hasRole(\SamUser\Entity\Role::ROLE_NAME_BAROS) && !$login->hasRole(\SamUser\Entity\Role::ROLE_NAME_UGYVEZETO) || $arulas->isEditableAndDeletable())) :
+                            ?>
+                            <a href="javascript:void(0)" class="torol" id="object_torol_<?php echo $arulas->getId() ?>" title="<?php echo $this->translate('Törlés'); ?>">
+                                <span class="glyphicon glyphicon-remove"></span>
+                            </a>
+                            <?php
+                        endif;
+                        ?>
+                    </td>
+                </tr>
+                <?php
+            }
+        endif;
+        ?>        
+    </tbody>
+</table>
+<br />
+
+<hr />
+<b><?php echo $this->translate("Árulás összesítő $from 00:00:00 ---> $to 23:59:59"); ?></b>
+
+<div id="aruforgas_osszesito"><!--Remote content --></div>
+
+<?php echo $this->partial('/application/partial_modal.phtml'); ?>
+
+<script>
+$(document).ready(function() {
+	$("#<?php echo $dataTableId ?>").dataTable({
+		language: {
+			url: '/js/DataTables-1.10.2/localization/Hungarian.json'
+		},
+		"order": [[ 0, "desc"]],
+		"columnDefs": [
+			{
+				"targets": [2, 5, 7],
+				"visible": false,
+			},
+
+			{ "orderable": false, "targets": [8] }
+		],
+	});
+	
+	$("#aruforgas_osszesito").load('/bar/osszesito');
+	
+	$("#mai_nap").click(function() {
+		$("#from").val('<?php echo $now->format('Y-m-d') ?>');
+		$("#to").val('<?php echo $now->format('Y-m-d') ?>');
+		$("form#interval_selector").submit();
+	});
+	
+	$("body").on('click', '.torol', function() {
+		$("#aruforgas_osszesito").load('/bar/osszesito');
+	});
+	
+});
+</script>

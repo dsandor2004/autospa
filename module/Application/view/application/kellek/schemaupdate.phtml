@@ -1,0 +1,13 @@
+<form method="post" id="formx">
+    <input type="password" value="" name="password" />
+</form>
+
+<a href="javascript:void(0)" onclick="document.getElementById('formx').submit();">doctrine-module orm:schema-tool:update --force</a>
+<div>
+    <?php
+    if ($success == 1) {
+        echo 'Migration successful!';
+    } else if ($success == -1)
+        echo 'Wrong Password!';
+    ?>
+</div>

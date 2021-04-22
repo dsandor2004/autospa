@@ -1,0 +1,72 @@
+<h2><?php echo $this->translate('Juttatások') ?></h2>
+<hr />
+<div class="hide" id="modal_saveformurl"><?php echo $this->url('juttatasok', array('action' => 'saveform')) ?></div>
+<div class="hide" id="ajax_error_message"><?php echo $this->translate('Hiba! A műveletet nem sikerült végrehajtani!'); ?></div>
+<div class="hide" id="modal_success"><?php echo $this->translate('A művelet sikeresen végrehajtódott!'); ?></div>
+
+<?php
+$form->prepare();
+echo $this->form()->openTag($form);
+?>
+<div class="form-group">
+    <?php echo $this->formRow($form->get('ejjelipenz')); ?>
+    <span class="help-block" id="help_<?php echo $form->get('ejjelipenz')->getAttribute('id') ?>"></span>
+</div>
+
+<div class="form-group">
+    <?php echo $this->formRow($form->get('habpenz')); ?>
+    <span class="help-block" id="help_<?php echo $form->get('habpenz')->getAttribute('id') ?>"></span>
+</div>
+
+<div class="form-group">
+    <?php echo $this->formRow($form->get('reklampenz')); ?>
+    <span class="help-block" id="help_<?php echo $form->get('reklampenz')->getAttribute('id') ?>"></span>
+</div>
+
+<div class="form-group">
+    <?php echo $this->formRow($form->get('baroscsaj')); ?>
+    <span class="help-block" id="help_<?php echo $form->get('baroscsaj')->getAttribute('id') ?>"></span>
+</div>
+
+<?php
+if ($this->isAllowed('juttatasok', 'modosit')) :
+    ?>
+    <a href='javascript:void(0)' class="btn btn-primary"><?php echo $this->translate('Módosít') ?></a>
+    <?php
+endif;
+?>
+
+<?php echo $this->form()->closeTag($form); ?>
+    
+<script>
+    $(document).ready(function() {
+
+        $("form .btn-primary").click(function(){
+            var url = $("#modal_saveformurl").html();
+
+            $.post(url, $("form").serialize(), function(resp) {
+
+                //clear all previous errors
+                $(".form-group").removeClass('has-error');
+                $(".help-block").each(function() {
+                    $(this).text("");
+                });
+
+                if(resp['id'] == undefined) {
+                    for(respKey in resp) {
+                        //readd errors 
+                        $("#" + respKey).closest('div.form-group').addClass('has-error');
+
+                        //readd error messages
+                        for (messageKey in resp[respKey]) {
+                            $("#help_" + respKey).append(resp[respKey][messageKey]);
+                        }
+                    }
+                } else {
+                    $("form").modal('hide');
+                    $.sticky($("#modal_success").html(), {classList: 'success', autoclose: 4000,  position: 'top-right'});                
+                } 
+            });
+        });
+    });
+</script>
